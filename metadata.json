@@ -1,0 +1,6 @@
+{
+  "name": "SEDUC Concursos - Plataforma Inteligente de Estudos",
+  "description": "Personal Study Engine para concursos da SEDUC com sistema multiagente de IA, RAG educacional, simulados adaptativos e gamificação.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
