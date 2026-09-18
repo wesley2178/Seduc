@@ -24,7 +24,7 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
   const [quantidade, setQuantidade] = useState<number>(3);
   const [dificuldade, setDificuldade] = useState<QuestaoDificuldade>('MEDIA');
   const [tipoOrigem, setTipoOrigem] = useState<QuestaoOrigem>('IA_INEDITA_EDITAL');
-  const [banca, setBanca] = useState<string>('VUNESP');
+  const [banca, setBanca] = useState<string>('CEV-UECE');
 
   const [generating, setGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
@@ -111,7 +111,7 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
               Gerador Inteligente de Questões Inéditas sob Demanda
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
-              O sistema não gera perguntas aleatórias. Ele consulta o edital em vigor, as provas anteriores da banca examinadora (VUNESP, FGV, CEBRASPE), a legislação seca oficial e passa por um pipeline com 10 agentes especializados de revisão e validação.
+              O sistema não gera perguntas aleatórias. Ele consulta o edital oficial da SEDUC-CE 2026, as provas da banca examinadora (CEV-UECE, IDECAN, CEBRASPE), a legislação do Ceará e nacional, e passa por um pipeline com 10 agentes especializados de revisão e validação.
             </p>
           </div>
         </div>
@@ -165,9 +165,10 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
               onChange={(e) => setBanca(e.target.value)}
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
             >
-              <option value="VUNESP">VUNESP (Banca Oficial SEDUC-SP)</option>
-              <option value="FGV">FGV (Fundação Getulio Vargas)</option>
+              <option value="CEV-UECE">CEV-UECE (Banca Oficial SEDUC-CE 2026)</option>
+              <option value="IDECAN">IDECAN</option>
               <option value="CEBRASPE">CEBRASPE / CESPE</option>
+              <option value="FGV">FGV (Fundação Getulio Vargas)</option>
               <option value="FCC">FCC (Fundação Carlos Chagas)</option>
             </select>
           </div>

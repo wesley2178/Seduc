@@ -15,6 +15,7 @@ import { GamificationView } from './components/GamificationView';
 import { RankingView } from './components/RankingView';
 import { AdminView } from './components/AdminView';
 import { DashboardSummary } from './types';
+import { studyService } from './services/studyService';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
@@ -26,17 +27,15 @@ export default function App() {
   const [activeConteudoId, setActiveConteudoId] = useState<string | undefined>(undefined);
   const [simulationType, setSimulationType] = useState<string | undefined>(undefined);
 
-  const fetchSummary = () => {
-    fetch('/api/dashboard')
-      .then((res) => res.json())
-      .then((data) => {
-        setSummary(data);
-        setLoadingSummary(false);
-      })
-      .catch((err) => {
-        console.error('Erro ao buscar resumo:', err);
-        setLoadingSummary(false);
-      });
+  const fetchSummary = async () => {
+    try {
+      const data = await studyService.getDashboardSummary();
+      setSummary(data);
+    } catch (err) {
+      console.error('Erro ao buscar resumo:', err);
+    } finally {
+      setLoadingSummary(false);
+    }
   };
 
   useEffect(() => {

@@ -54,7 +54,7 @@ export const RankingView: React.FC = () => {
               <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30">
                 Quadro de Honra Concurseiro
               </span>
-              <span className="text-xs text-slate-400">• SEDUC-SP</span>
+              <span className="text-xs text-slate-400">• SEDUC-CE 2026</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
               <Trophy className="w-6 h-6 text-amber-400" />

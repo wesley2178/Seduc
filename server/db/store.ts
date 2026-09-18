@@ -51,8 +51,14 @@ class DatabaseStore {
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         const parsed = JSON.parse(raw) as DatabaseSchema;
-        // Garantir que todas as coleções existam
         const seed = getInitialSeedData();
+
+        // Se o banco contiver o edital antigo ou não tiver o edital SEDUC-CE 2026, reinicializar com o novo edital
+        if (!parsed.editais?.some(e => e.id === 'edital_seduc_ce_2026')) {
+          fs.writeFileSync(DB_FILE, JSON.stringify(seed, null, 2), 'utf-8');
+          return seed;
+        }
+
         return {
           users: parsed.users || seed.users,
           editais: parsed.editais || seed.editais,

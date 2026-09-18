@@ -11,6 +11,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Questao } from '../types';
+import { studyService } from '../services/studyService';
 
 interface ErrorsViewProps {
   onStartSimulation: (tipo: string) => void;
@@ -21,18 +22,16 @@ export const ErrorsView: React.FC<ErrorsViewProps> = ({ onStartSimulation, onGoT
   const [data, setData] = useState<{ total_erros: number; questoes_com_erros: { questao: Questao & { disciplina_nome?: string }; totalErros: number; ultimaTentativa: string }[] } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchErros = () => {
+  const fetchErros = async () => {
     setLoading(true);
-    fetch('/api/erros')
-      .then(res => res.json())
-      .then(d => {
-        setData(d);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
+    try {
+      const d = await studyService.getCadernoErros();
+      setData(d);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

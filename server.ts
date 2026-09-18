@@ -155,6 +155,56 @@ async function startServer() {
     });
   });
 
+  // 2.1 TEXTO INTEGRAL DO EDITAL
+  app.get('/api/edital/texto-integral', (req, res) => {
+    const edital = db.getEditais().find(e => e.status === 'ativo') || db.getEditais()[0];
+    res.json({
+      id: edital.id,
+      nome: edital.nome,
+      banca: edital.banca,
+      cargo: edital.cargo,
+      texto_integral: edital.texto_integral || edital.texto_extraido,
+      resumo_executivo: edital.resumo_executivo || edital.texto_extraido
+    });
+  });
+
+  // 2.2 LEITURA DO EDITAL POR IA
+  app.post('/api/edital/analisar-ia', async (req, res) => {
+    try {
+      const edital = db.getEditais().find(e => e.status === 'ativo') || db.getEditais()[0];
+      const textoParaAnalise = edital?.texto_integral || edital?.texto_extraido || 'Edital SEDUC-CE 2026 CEV-UECE';
+      const resultado = await agentOrchestrator.analyzeEditalWithAI(textoParaAnalise);
+      res.json(resultado);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // 2.3 GERAR BATERIA DE QUESTÕES AUTOMATICAMENTE BASEADA NO EDITAL
+  app.post('/api/edital/gerar-bateria-questoes', async (req, res) => {
+    try {
+      const { disciplina_id } = req.body;
+      const disciplinas = db.getDisciplinas();
+      const disc = disciplina_id ? disciplinas.find(d => d.id === disciplina_id) : disciplinas[0];
+      const edital = db.getEditais().find(e => e.status === 'ativo') || db.getEditais()[0];
+      
+      const novas = await agentOrchestrator.generateQuestionsOnDemand({
+        disciplina_id: disc ? disc.id : disciplinas[0].id,
+        quantidade: 2,
+        dificuldade: 'MEDIA',
+        banca: edital?.banca || 'CEV-UECE'
+      });
+
+      res.json({
+        sucesso: true,
+        questoes_criadas: novas.length,
+        novas_questoes: novas
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // 3. QUESTÕES E FILTROS (Itens 28, 29)
   app.get('/api/questoes', (req, res) => {
     const { disciplina_id, conteudo_id, origem, dificuldade, banca, search } = req.query;

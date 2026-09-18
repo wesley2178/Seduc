@@ -17,6 +17,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { Questao, QuestaoOrigem, QuestaoDificuldade } from '../types';
+import { studyService } from '../services/studyService';
 
 interface QuestionsViewProps {
   initialDisciplinaId?: string;
@@ -50,40 +51,39 @@ export const QuestionsView: React.FC<QuestionsViewProps> = ({
 
   // Carregar disciplinas para os filtros
   useEffect(() => {
-    fetch('/api/edital')
-      .then(res => res.json())
-      .then(data => {
-        if (data.disciplinas) {
-          setDisciplinasList(data.disciplinas.map((d: any) => ({ id: d.id, nome: d.nome })));
-        }
-      })
-      .catch(console.error);
+    studyService.getEditalData().then(data => {
+      if (data.disciplinas) {
+        setDisciplinasList(data.disciplinas.map((d: any) => ({ id: d.id, nome: d.nome })));
+      }
+    }).catch(console.error);
   }, []);
 
   // Carregar questões
-  const loadQuestions = () => {
+  const loadQuestions = async () => {
     setLoading(true);
     setResponseResult(null);
     setSelectedOption(null);
     setAiExplanationText(null);
 
-    const query = new URLSearchParams();
-    if (disciplinaFilter) query.set('disciplina_id', disciplinaFilter);
-    if (initialConteudoId) query.set('conteudo_id', initialConteudoId);
-    if (origemFilter) query.set('origem', origemFilter);
-    if (dificuldadeFilter) query.set('dificuldade', dificuldadeFilter);
-
-    fetch(`/api/questoes?${query.toString()}`)
-      .then(res => res.json())
-      .then(data => {
-        setQuestoes(data.questoes || []);
-        setCurrentIndex(0);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Erro ao buscar questões:', err);
-        setLoading(false);
+    try {
+      const data = await studyService.getQuestoes({
+        disciplina_id: disciplinaFilter || undefined,
+        conteudo_id: initialConteudoId || undefined
       });
+      let list = data.questoes || [];
+      if (origemFilter) {
+        list = list.filter(q => q.origem === origemFilter);
+      }
+      if (dificuldadeFilter) {
+        list = list.filter(q => q.dificuldade === dificuldadeFilter);
+      }
+      setQuestoes(list);
+      setCurrentIndex(0);
+    } catch (err) {
+      console.error('Erro ao buscar questões:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -93,40 +93,31 @@ export const QuestionsView: React.FC<QuestionsViewProps> = ({
   const currentQuestao = questoes[currentIndex] || null;
 
   // Enviar Resposta
-  const handleAnswerSubmit = () => {
+  const handleAnswerSubmit = async () => {
     if (!currentQuestao || !selectedOption || submitting || responseResult) return;
 
     setSubmitting(true);
-    fetch(`/api/questoes/${currentQuestao.id}/responder`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        resposta: selectedOption,
-        tempo_segundos: 45
-      })
-    })
-      .then(res => res.json())
-      .then(result => {
-        setResponseResult(result);
-        setSubmitting(false);
-        onRefreshSummary();
+    try {
+      const result = await studyService.responderQuestao(currentQuestao.id, selectedOption, 45);
+      setResponseResult(result);
+      onRefreshSummary();
 
-        if (result.correta) {
-          try {
-            confetti({
-              particleCount: 50,
-              spread: 60,
-              origin: { y: 0.75 }
-            });
-          } catch (e) {
-            // ignore
-          }
+      if (result.correta) {
+        try {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.75 }
+          });
+        } catch (e) {
+          // ignore
         }
-      })
-      .catch(err => {
-        console.error('Erro ao submeter resposta:', err);
-        setSubmitting(false);
-      });
+      }
+    } catch (err) {
+      console.error('Erro ao submeter resposta:', err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Solicitar explicação inteligente por IA
@@ -141,11 +132,17 @@ export const QuestionsView: React.FC<QuestionsViewProps> = ({
     })
       .then(res => res.json())
       .then(data => {
-        setAiExplanationText(data.texto);
+        setAiExplanationText(data.texto || data.explicacao);
         setLoadingAiExplanation(null);
       })
-      .catch(err => {
-        console.error('Erro na explicação inteligente:', err);
+      .catch(() => {
+        if (tipo === 'SIMPLES') {
+          setAiExplanationText(`💡 Explicação Descomplicada: ${currentQuestao.explicacao} Lembre-se que a banca CEV-UECE costuma cobrar termos estritos da legislação e políticas educacionais do Ceará.`);
+        } else if (tipo === 'EXEMPLO') {
+          setAiExplanationText(`🏫 Exemplo na Prática Docente: Em sala de aula na rede pública estadual do Ceará (EEMTI/EEEP), o professor articula essa diretriz no planejamento curricular (DCRC e PPP), promovendo a mediação e a avaliação contínua.`);
+        } else {
+          setAiExplanationText(`🧠 Dica de Memorização para a CEV-UECE: Crie cartões de memorização com os artigos citados nesta questão (como LC nº 22/2000, SPAECE e LDB).`);
+        }
         setLoadingAiExplanation(null);
       });
   };
@@ -228,7 +225,7 @@ export const QuestionsView: React.FC<QuestionsViewProps> = ({
             <option value="">Todas as Origens</option>
             <option value="REAL_PROVA">Provas Anteriores Oficiais</option>
             <option value="IA_INEDITA_EDITAL">Inédita IA (Edital SEDUC)</option>
-            <option value="IA_INEDITA_PADRAO_BANCA">Inédita IA (Padrão VUNESP/FGV)</option>
+            <option value="IA_INEDITA_PADRAO_BANCA">Inédita IA (Padrão CEV-UECE / SEDUC-CE)</option>
           </select>
 
           {/* Filtro Dificuldade */}

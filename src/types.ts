@@ -17,13 +17,15 @@ export type EditalStatus = 'ativo' | 'inativo' | 'analisando' | 'arquivado';
 export interface Edital {
   id: string;
   nome: string;
-  orgao: string; // Ex: SEDUC-SP
-  cargo: string; // Ex: Professor de Educação Básica II
-  banca: string; // Ex: VUNESP, FGV, CEBRASPE
+  orgao: string; // Ex: SEDUC-CE
+  cargo: string; // Ex: Professor da Educação Básica
+  banca: string; // Ex: CEV-UECE, IDECAN, CEBRASPE, FGV
   data_publicacao: string;
   data_prova: string;
   arquivo_url?: string;
   texto_extraido?: string;
+  texto_integral?: string;
+  resumo_executivo?: string;
   status: EditalStatus;
   versao: string;
   created_at: string;
@@ -86,8 +88,8 @@ export interface Questao {
   disciplina_id: string;
   conteudo_id?: string | null;
   origem: QuestaoOrigem;
-  fonte: string; // Ex: Prova Vunesp 2023 - Caderno 01
-  banca: string; // Ex: VUNESP
+  fonte: string; // Ex: Prova CEV-UECE SEDUC-CE - Caderno 01
+  banca: string; // Ex: CEV-UECE
   ano: number;
   enunciado: string;
   alternativas: QuestaoAlternativa[];
@@ -158,6 +160,9 @@ export interface Simulado {
   quantidade_questoes: number;
   tempo_limite: number; // em minutos
   nota?: number; // 0 a 100
+  acertos?: number;
+  erros?: number;
+  taxa_acerto?: number;
   status: 'em_andamento' | 'finalizado' | 'cancelado';
   questoes_ids: string[];
   respostas?: Record<string, 'A' | 'B' | 'C' | 'D' | 'E'>;
@@ -204,6 +209,7 @@ export interface GamificationProfile {
   last_activity_at: string;
   avatar_id?: string;
   pet_id?: string;
+  levelInfo?: any;
 }
 
 export interface XPTransaction {

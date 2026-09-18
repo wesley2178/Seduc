@@ -75,7 +75,7 @@ export class SimulationService {
       }
 
       case 'REALISTA': {
-        titulo = 'Simulado Realista Padrão VUNESP SEDUC';
+        titulo = 'Simulado Realista Padrão CEV-UECE SEDUC-CE 2026';
         tempoLimite = 45; // simulado cronometrado de prova real
         selecionadas = allQuestoes;
         break;
