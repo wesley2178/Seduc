@@ -161,10 +161,10 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                Banca Examinadora Oficial • Groq Llama 3.3
+                Banca Examinadora Oficial • Groq Cloud AI
               </span>
               <span className="text-xs font-medium text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                llama-3.3-70b-versatile
+                Groq High-Speed LPU
               </span>
               <span className="text-xs text-slate-400">• Rigor de Concurso Público</span>
             </div>
@@ -388,25 +388,31 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
           </div>
 
           <div className="space-y-3">
-            {generatedQuestions.map((q, idx) => (
-              <div 
-                key={q.id}
-                className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3 shadow-sm"
-              >
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-indigo-400">Questão Inédita #{idx + 1}</span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold">
-                    Validada por IA
-                  </span>
+            {generatedQuestions.map((q, idx) => {
+              if (!q) return null;
+              const enunciado = typeof q.enunciado === 'string' ? q.enunciado : JSON.stringify(q.enunciado || '');
+              const resposta = typeof q.resposta_correta === 'string' ? q.resposta_correta : String(q.resposta_correta || 'A');
+              const explicacao = typeof q.explicacao === 'string' ? q.explicacao : JSON.stringify(q.explicacao || '');
+              return (
+                <div 
+                  key={q.id || `gen_${idx}`}
+                  className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3 shadow-sm"
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-indigo-400">Questão Inédita #{idx + 1}</span>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] font-semibold">
+                      Validada por IA
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
+                    {enunciado}
+                  </p>
+                  <div className="text-xs text-slate-400 bg-slate-950 p-3 rounded-lg border border-slate-800">
+                    <strong className="text-slate-300">Gabarito: Alternativa {resposta}</strong> — {explicacao}
+                  </div>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
-                  {q.enunciado}
-                </p>
-                <div className="text-xs text-slate-400 bg-slate-950 p-3 rounded-lg border border-slate-800">
-                  <strong className="text-slate-300">Gabarito: Alternativa {q.resposta_correta}</strong> — {q.explicacao}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

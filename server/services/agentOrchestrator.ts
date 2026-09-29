@@ -23,7 +23,96 @@ function getGroq(): Groq | null {
   return groqClient;
 }
 
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const DEFAULT_GROQ_MODEL = 'qwen/qwen3.8-27b';
+let resolvedGroqModel: string | null = null;
+
+export async function getActiveGroqModel(groq?: Groq | null): Promise<string> {
+  if (resolvedGroqModel) return resolvedGroqModel;
+
+  if (process.env.GROQ_MODEL && process.env.GROQ_MODEL.trim().length > 0) {
+    resolvedGroqModel = process.env.GROQ_MODEL.trim();
+    return resolvedGroqModel;
+  }
+
+  const client = groq || getGroq();
+  if (client) {
+    try {
+      const modelList = await client.models.list();
+      const availableIds = modelList.data.map(m => m.id);
+
+      // Ordem de preferência de modelos compatíveis com chat e JSON estruturado
+      const preference = [
+        'qwen/qwen3.8-27b',
+        'openai/gpt-oss-120b',
+        'llama-3.3-70b-versatile',
+        'openai/gpt-oss-20b',
+        'llama-3.1-8b-instant'
+      ];
+
+      for (const candidate of preference) {
+        if (availableIds.includes(candidate)) {
+          resolvedGroqModel = candidate;
+          console.log(`[Groq Auto-Detect] Modelo ativo selecionado: ${resolvedGroqModel}`);
+          return resolvedGroqModel;
+        }
+      }
+
+      const usable = availableIds.find(id => !id.includes('whisper') && !id.includes('prompt-guard'));
+      if (usable) {
+        resolvedGroqModel = usable;
+        return resolvedGroqModel;
+      }
+    } catch (err: any) {
+      console.warn('[Groq Model Detection] Aviso ao listar modelos:', err.message);
+    }
+  }
+
+  resolvedGroqModel = DEFAULT_GROQ_MODEL;
+  return resolvedGroqModel;
+}
+
+/**
+ * Funções auxiliares para sanitização rigorosa de tipos retornados pela IA
+ * Evita que o React receba objetos aninhados onde espera strings (causa de tela branca)
+ */
+function safeString(val: any, fallback = ''): string {
+  if (typeof val === 'string') return val.trim();
+  if (val === null || val === undefined) return fallback;
+  if (typeof val === 'object') {
+    if (typeof val.texto === 'string') return val.texto.trim();
+    if (typeof val.descricao === 'string') return val.descricao.trim();
+    if (typeof val.explicacao === 'string') return val.explicacao.trim();
+    if (typeof val.enunciado === 'string') return val.enunciado.trim();
+    if (typeof val.content === 'string') return val.content.trim();
+    try {
+      return Object.values(val).filter(v => typeof v === 'string').join(' ') || JSON.stringify(val);
+    } catch {
+      return fallback;
+    }
+  }
+  return String(val).trim();
+}
+
+function sanitizeAlternativas(alts: any): { letra: 'A' | 'B' | 'C' | 'D' | 'E'; texto: string }[] {
+  const letters: ('A' | 'B' | 'C' | 'D' | 'E')[] = ['A', 'B', 'C', 'D', 'E'];
+  if (!Array.isArray(alts) || alts.length === 0) {
+    return letters.map(l => ({ letra: l, texto: `Alternativa ${l}` }));
+  }
+  return letters.map((l, idx) => {
+    const raw = alts[idx];
+    if (typeof raw === 'string') {
+      return { letra: l, texto: raw.trim() };
+    }
+    const texto = safeString(raw?.texto || raw?.descricao || raw?.opcao || raw?.content || `Alternativa ${l}`);
+    return { letra: l, texto };
+  });
+}
+
+function sanitizeGabarito(val: any): 'A' | 'B' | 'C' | 'D' | 'E' {
+  const str = safeString(val).toUpperCase();
+  const match = str.match(/[A-E]/);
+  return (match ? match[0] : 'A') as 'A' | 'B' | 'C' | 'D' | 'E';
+}
 
 /**
  * PROMPT DE SISTEMA: BANCA EXAMINADORA OFICIAL DE CONCURSOS PÚBLICOS
@@ -90,17 +179,18 @@ Gabarito: ${q.resposta_correta}
 Alternativas: ${q.alternativas.map(a => `${a.letra}) ${a.texto}`).join(' | ')}
 Fundamentação: ${q.explicacao}`);
 
+    const groq = getGroq();
+    const activeModel = await getActiveGroqModel(groq);
+
     db.addLog({
       agent_name: 'ORQUESTRADOR',
       request: `Demanda de ${params.quantidade} questão(ões) de ${disciplina?.nome || 'Geral'} [${dificuldade}]`,
-      context: `Edital: ${edital?.nome}, Banca: ${banca}, Motor: Groq ${GROQ_MODEL}`,
+      context: `Edital: ${edital?.nome}, Banca: ${banca}, Motor: Groq ${activeModel}`,
       sources: contextDocs.map(d => d.source_title),
-      result: `Acionando Groq (${GROQ_MODEL}): Pesquisador RAG -> Gerador Banca -> Revisor -> Validador -> Duplicidade`,
+      result: `Acionando Groq (${activeModel}): Pesquisador RAG -> Gerador Banca -> Revisor -> Validador -> Duplicidade`,
       status: 'SUCESSO',
       execution_time_ms: Date.now() - startTime
     });
-
-    const groq = getGroq();
 
     // Execução paralela e com proteção de timeout para evitar travamento em ambientes serverless (Vercel)
     const questionPromises = Array.from({ length: params.quantidade }).map(async (_, i) => {
@@ -155,8 +245,8 @@ RETORNE OBRIGATORIAMENTE EM FORMATO JSON ESTRUTURADO COM AS SEGUINTES CHAVES EXA
             setTimeout(() => reject(new Error('Groq request timeout')), 7500)
           );
 
-          const groqPromise = groq.chat.completions.create({
-            model: GROQ_MODEL,
+          const callGroq = (modelName: string) => groq.chat.completions.create({
+            model: modelName,
             messages: [
               {
                 role: 'system',
@@ -172,11 +262,23 @@ RETORNE OBRIGATORIAMENTE EM FORMATO JSON ESTRUTURADO COM AS SEGUINTES CHAVES EXA
             max_tokens: 3000
           });
 
-          const completion = await Promise.race([groqPromise, timeoutPromise]);
+          let completion;
+          try {
+            completion = await Promise.race([callGroq(activeModel), timeoutPromise]);
+          } catch (modelErr: any) {
+            // Se o modelo primário retornar 404/not_found, tentar o modelo padrão testado
+            if (activeModel !== DEFAULT_GROQ_MODEL && (modelErr?.message?.includes('does not exist') || modelErr?.status === 404)) {
+              console.warn(`[Groq Fallback] Modelo ${activeModel} indisponível. Recorrendo a ${DEFAULT_GROQ_MODEL}.`);
+              completion = await Promise.race([callGroq(DEFAULT_GROQ_MODEL), timeoutPromise]);
+            } else {
+              throw modelErr;
+            }
+          }
+
           const responseText = completion.choices[0]?.message?.content?.trim() || '';
           rawQuestao = JSON.parse(responseText);
         } catch (err: any) {
-          console.warn(`[Groq Llama 3.3 Gen] Erro ou timeout na questão ${i + 1}:`, err.message);
+          console.warn(`[Groq Gen] Erro ou timeout na questão ${i + 1}:`, err.message);
         }
       } else {
         console.warn('[Groq] GROQ_API_KEY não configurada no ambiente. Utilizando gerador calibrado da banca CEV-UECE.');
@@ -202,19 +304,19 @@ RETORNE OBRIGATORIAMENTE EM FORMATO JSON ESTRUTURADO COM AS SEGUINTES CHAVES EXA
         disciplina_id: params.disciplina_id,
         conteudo_id: params.conteudo_id || null,
         origem: params.tipo_origem || 'IA_INEDITA_EDITAL',
-        fonte: `Questão Inédita SEDUC-CE 2026 — Padrão ${banca} (Groq llama-3.3-70b-versatile)`,
+        fonte: `Questão Inédita SEDUC-CE 2026 — Padrão ${banca} (Groq ${activeModel})`,
         banca: banca,
         ano: new Date().getFullYear(),
-        enunciado: rawQuestao.enunciado,
-        alternativas: rawQuestao.alternativas,
-        resposta_correta: rawQuestao.resposta_correta,
-        explicacao: rawQuestao.explicacao,
-        por_que_correta: rawQuestao.por_que_correta,
-        por_que_outras_erradas: rawQuestao.por_que_outras_erradas,
+        enunciado: safeString(rawQuestao.enunciado, 'Questão contextualizada do edital.'),
+        alternativas: sanitizeAlternativas(rawQuestao.alternativas),
+        resposta_correta: sanitizeGabarito(rawQuestao.resposta_correta),
+        explicacao: safeString(rawQuestao.explicacao, 'Fundamentação oficial da banca examinadora.'),
+        por_que_correta: safeString(rawQuestao.por_que_correta, 'Alternativa correta conforme as diretrizes do edital.'),
+        por_que_outras_erradas: safeString(rawQuestao.por_que_outras_erradas, 'Distratores inconsistentes com a norma legal.'),
         dificuldade: dificuldade,
-        assunto: rawQuestao.assunto || conteudo?.nome || disciplina?.nome || 'Geral',
-        subassunto: rawQuestao.subassunto || 'Tópico do Edital',
-        tags: [banca, disciplina?.nome?.split(' ')[0] || 'Geral', 'Groq Llama 3.3', 'SEDUC-CE', 'Banca Examinadora'],
+        assunto: safeString(rawQuestao.assunto, conteudo?.nome || disciplina?.nome || 'Geral'),
+        subassunto: safeString(rawQuestao.subassunto, 'Tópico do Edital'),
+        tags: [banca, disciplina?.nome?.split(' ')[0] || 'Geral', `Groq ${activeModel}`, 'SEDUC-CE', 'Banca Examinadora'],
         status: validationResult.resultado === 'VALIDADA' ? 'publicada' : 'revisando',
         validada: validationResult.resultado === 'VALIDADA',
         created_at: new Date().toISOString(),
@@ -225,7 +327,7 @@ RETORNE OBRIGATORIAMENTE EM FORMATO JSON ESTRUTURADO COM AS SEGUINTES CHAVES EXA
 
       db.addLog({
         agent_name: 'GERADOR_QUESTOES',
-        request: `Geração de questão ${i + 1}/${params.quantidade} (${dificuldade}) via Groq ${GROQ_MODEL}`,
+        request: `Geração de questão ${i + 1}/${params.quantidade} (${dificuldade}) via Groq ${activeModel}`,
         sources: [rawQuestao.referencia_legal || 'Edital SEDUC-CE / LDB / ECA / SPAECE / LC 22/2000'],
         result: `Questão gerada: ${novaQuestao.id} [${validationResult.resultado}] - Gabarito: ${novaQuestao.resposta_correta}`,
         status: validationResult.resultado === 'VALIDADA' ? 'SUCESSO' : 'AVISO',
@@ -375,8 +477,9 @@ Por que correta: ${questao.por_que_correta || ''}
 Instrução Específica para o Professor:
 ${instruction}`;
 
+        const activeModel = await getActiveGroqModel(groq);
         const resp = await groq.chat.completions.create({
-          model: GROQ_MODEL,
+          model: activeModel,
           messages: [
             {
               role: 'system',
@@ -415,8 +518,9 @@ ${instruction}`;
     const groq = getGroq();
     if (groq) {
       try {
+        const activeModel = await getActiveGroqModel(groq);
         const response = await groq.chat.completions.create({
-          model: GROQ_MODEL,
+          model: activeModel,
           messages: [
             {
               role: 'system',

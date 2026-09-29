@@ -82,10 +82,11 @@ export const EditalView: React.FC<EditalViewProps> = ({ onStartTopicPractice }) 
     setStatusMessage(null);
     try {
       const res = await studyService.gerarBateriaQuestoesDoEdital(selectedDiscToGenerate);
-      setGeneratedBatch(prev => [...res.novas_questoes, ...prev]);
-      setStatusMessage(`Sucesso! ${res.questoes_criadas} novas questões inéditas foram geradas e incorporadas ao banco de questões.`);
+      const novas = Array.isArray(res?.novas_questoes) ? res.novas_questoes : [];
+      setGeneratedBatch(prev => [...novas, ...prev]);
+      setStatusMessage(`Sucesso! ${novas.length || res?.questoes_criadas || 0} novas questões inéditas foram geradas e incorporadas ao banco de questões.`);
     } catch (err: any) {
-      setStatusMessage('Erro ao gerar questões: ' + err.message);
+      setStatusMessage('Erro ao gerar questões: ' + (err?.message || 'Erro inesperado'));
     } finally {
       setAiGeneratingQuestions(false);
     }
@@ -539,34 +540,40 @@ export const EditalView: React.FC<EditalViewProps> = ({ onStartTopicPractice }) 
                 Questões Inéditas Geradas da Leitura do Edital ({generatedBatch.length})
               </h3>
               <div className="space-y-4">
-                {generatedBatch.map((q) => (
-                  <div key={q.id} className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
-                    <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span className="font-bold text-indigo-400">{q.fonte}</span>
-                      <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300">{q.dificuldade}</span>
+                {generatedBatch.map((q, idx) => {
+                  if (!q) return null;
+                  const enunciado = typeof q.enunciado === 'string' ? q.enunciado : JSON.stringify(q.enunciado || '');
+                  const explicacao = typeof q.explicacao === 'string' ? q.explicacao : JSON.stringify(q.explicacao || '');
+                  const alternativas = Array.isArray(q.alternativas) ? q.alternativas : [];
+                  return (
+                    <div key={q.id || `batch_${idx}`} className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
+                      <div className="flex items-center justify-between text-xs text-slate-400">
+                        <span className="font-bold text-indigo-400">{q.fonte}</span>
+                        <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300">{q.dificuldade}</span>
+                      </div>
+                      <p className="text-xs text-slate-200 leading-relaxed font-medium">
+                        {enunciado}
+                      </p>
+                      <div className="space-y-1.5 pl-2">
+                        {alternativas.map(alt => (
+                          <div 
+                            key={alt.letra} 
+                            className={`p-2 rounded-xl text-xs border ${
+                              alt.letra === q.resposta_correta 
+                                ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300 font-semibold' 
+                                : 'bg-slate-900/40 border-slate-800/80 text-slate-400'
+                            }`}
+                          >
+                            <span className="font-bold mr-2">{alt.letra})</span> {typeof alt.texto === 'string' ? alt.texto : JSON.stringify(alt.texto || '')}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="p-3 bg-indigo-950/20 border border-indigo-500/20 rounded-xl text-xs text-indigo-300">
+                        <strong>Fundamentação:</strong> {explicacao}
+                      </div>
                     </div>
-                    <p className="text-xs text-slate-200 leading-relaxed font-medium">
-                      {q.enunciado}
-                    </p>
-                    <div className="space-y-1.5 pl-2">
-                      {q.alternativas.map(alt => (
-                        <div 
-                          key={alt.letra} 
-                          className={`p-2 rounded-xl text-xs border ${
-                            alt.letra === q.resposta_correta 
-                              ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300 font-semibold' 
-                              : 'bg-slate-900/40 border-slate-800/80 text-slate-400'
-                          }`}
-                        >
-                          <span className="font-bold mr-2">{alt.letra})</span> {alt.texto}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="p-3 bg-indigo-950/20 border border-indigo-500/20 rounded-xl text-xs text-indigo-300">
-                      <strong>Fundamentação:</strong> {q.explicacao}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

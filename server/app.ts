@@ -17,13 +17,19 @@ export function createExpressApp(): Express {
   // API ROUTES
   // ==========================================
 
-  app.get('/api/health', (req, res) => {
+  app.get('/api/health', async (req, res) => {
     const hasGroqKey = Boolean(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim().length > 0);
+    let modelName = 'qwen/qwen3.8-27b';
+    try {
+      const { getActiveGroqModel } = await import('./services/agentOrchestrator');
+      modelName = await getActiveGroqModel();
+    } catch {}
+
     res.json({ 
       status: 'ok', 
       service: 'SEDUC Concursos Personal Study Engine',
       ai_provider: 'Groq',
-      ai_model: 'llama-3.3-70b-versatile',
+      ai_model: modelName,
       groq_key_configured: hasGroqKey,
       environment: process.env.VERCEL ? 'vercel_serverless' : 'node_server'
     });
