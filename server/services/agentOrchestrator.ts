@@ -259,7 +259,7 @@ RETORNE OBRIGATORIAMENTE EM FORMATO JSON ESTRUTURADO COM AS SEGUINTES CHAVES EXA
             ],
             response_format: { type: 'json_object' },
             temperature: 0.25,
-            max_tokens: 3000
+            max_tokens: 800
           });
 
           let completion;
@@ -491,7 +491,7 @@ ${instruction}`;
             }
           ],
           temperature: 0.3,
-          max_tokens: 1200
+          max_tokens: 750
         });
 
         const output = resp.choices[0]?.message?.content?.trim();

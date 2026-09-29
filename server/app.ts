@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import express, { Express } from 'express';
 import { db } from './db/store';
 import { awardXP, updateStreak, getRankings, calculateLevel } from './services/xpService';
@@ -9,6 +8,15 @@ import { ragService } from './services/ragService';
 export function createExpressApp(): Express {
   const app = express();
   app.use(express.json());
+
+  // Compatibilidade de roteamento para ambientes Serverless (Vercel) e Container (Local/Cloud Run)
+  app.use((req, res, next) => {
+    // Se a Vercel remover o prefixo /api na reescrita de rotas, restaura para o Express casar
+    if (!req.url.startsWith('/api') && !req.url.startsWith('/@') && !req.url.startsWith('/src')) {
+      req.url = `/api${req.url}`;
+    }
+    next();
+  });
 
   // Middleware de identificação do usuário padrão
   const DEFAULT_USER_ID = 'user_wesley';

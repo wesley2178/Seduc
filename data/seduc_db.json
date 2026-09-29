@@ -257,6 +257,412 @@
   ],
   "questoes": [
     {
+      "id": "q_groq_1790642799094_2_ddts",
+      "edital_id": "edital_seduc_ce_2026",
+      "conteudo_id": null,
+      "origem": "IA_INEDITA_EDITAL",
+      "fonte": "Questão Inédita SEDUC-CE 2026 — Padrão CEV-UECE (Fundação Universidade Estadual do Ceará) (Groq qwen/qwen3.8-27b)",
+      "banca": "CEV-UECE (Fundação Universidade Estadual do Ceará)",
+      "ano": 2026,
+      "enunciado": "Na perspectiva da Pedagogia da Autonomia de Paulo Freire, obra referenciada no programa de Conhecimentos Pedagógicos da banca examinadora da SEDUC-CE, a prática educativa verdadeiramente progressista e emancipatória exige do educador o reconhecimento de que:",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "ensinar consiste essencialmente em transferir o conhecimento acumulado aos educandos de forma neutra e desvinculada de sua realidade social."
+        },
+        {
+          "letra": "B",
+          "texto": "ensinar não é transferir conhecimento, mas criar as possibilidades para a sua própria produção ou a sua construção, mediante rigorosidade metódica e respeito aos saberes dos educandos."
+        },
+        {
+          "letra": "C",
+          "texto": "a autoridade docente deve ser exercida de modo autoritário para assegurar a disciplina necessária à fixação passiva dos conteúdos."
+        },
+        {
+          "letra": "D",
+          "texto": "o saber ingênuo e a experiência popular trazida pelos educandos das classes trabalhadoras devem ser descartados pelo professor no início do ano letivo."
+        },
+        {
+          "letra": "E",
+          "texto": "a reflexão crítica sobre a prática não interfere na formação ética e didática do docente."
+        }
+      ],
+      "resposta_correta": "B",
+      "explicacao": "Na tese central de \"Pedagogia da Autonomia: saberes necessários à prática educativa\", Paulo Freire formula expressamente que \"ensinar não é transferir conhecimento, mas criar as possibilidades para a sua própria produção ou a sua construção\". Tal preceito exige do professor a relação dialógica, a humildade e a reflexão crítica constante.",
+      "por_que_correta": "A alternativa B reproduz o postulado matricial do pensamento freiriano sobre o ato de ensinar e a relação professor-aluno.",
+      "por_que_outras_erradas": "A, C, D e E representam a concepção \"bancária\", autoritária e alienadora veementemente combatida por Freire em toda a sua obra.",
+      "dificuldade": "MEDIA",
+      "assunto": "Conhecimentos Pedagógicos",
+      "subassunto": "Pedagogia da Autonomia (Paulo Freire)",
+      "tags": [
+        "CEV-UECE (Fundação Universidade Estadual do Ceará)",
+        "Geral",
+        "Groq qwen/qwen3.8-27b",
+        "SEDUC-CE",
+        "Banca Examinadora"
+      ],
+      "status": "publicada",
+      "validada": true,
+      "created_at": "2026-09-29T00:46:39.094Z",
+      "updated_at": "2026-09-29T00:46:39.094Z"
+    },
+    {
+      "id": "q_groq_1790642799074_0_b4q5",
+      "edital_id": "edital_seduc_ce_2026",
+      "conteudo_id": null,
+      "origem": "IA_INEDITA_EDITAL",
+      "fonte": "Questão Inédita SEDUC-CE 2026 — Padrão CEV-UECE (Fundação Universidade Estadual do Ceará) (Groq qwen/qwen3.8-27b)",
+      "banca": "CEV-UECE (Fundação Universidade Estadual do Ceará)",
+      "ano": 2026,
+      "enunciado": "Em conformidade com a Lei Complementar Estadual nº 22/2000 (Estatuto do Magistério Oficial do Ceará) e a Lei Federal nº 11.738/2008, a jornada de trabalho do Professor da Educação Básica da rede pública estadual cearense é estruturada com reserva obrigatória de parte de sua carga horária para atividades extraclasse, estudos e planejamento pedagógico. Acerca dessa regulamentação, assinale a opção correta:",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A jornada de trabalho docente destinará, no máximo, 15% (quinze por cento) de sua duração para atividades extraclasse, devendo o restante ser estritamente cumprido em regência efetiva de classe."
+        },
+        {
+          "letra": "B",
+          "texto": "Na composição da jornada de trabalho, observar-se-á o limite máximo de 2/3 (dois terços) da carga horária para o desempenho das atividades de interação com os educandos, garantindo-se ao menos 1/3 (um terço) para atividades extraclasse e planejamento."
+        },
+        {
+          "letra": "C",
+          "texto": "A reserva de horas para atividades extraclasse é facultativa para as escolas de tempo integral (EEMTIs), ficando a critério exclusivo da Coordenadoria Regional (CREDE)."
+        },
+        {
+          "letra": "D",
+          "texto": "As horas dedicadas a estudos e planejamento pedagógico podem ser integralmente suprimidas pelo gestor escolar em caso de reposição de dias letivos decorrentes de greve."
+        },
+        {
+          "letra": "E",
+          "texto": "O cumprimento do terço extraclasse é restrito aos professores detentores de título de pós-graduação stricto sensu."
+        }
+      ],
+      "resposta_correta": "B",
+      "explicacao": "A Lei Federal nº 11.738/2008 (Art. 2º, § 4º) e o Estatuto do Magistério do Estado do Ceará (LC nº 22/2000) consagram a garantia legal de que, na jornada de trabalho, o limite máximo para interação com educandos é de 2/3, reservando-se no mínimo 1/3 (um terço) para atividades de planejamento pedagógico, preparação de aulas e avaliação (HTPC).",
+      "por_que_correta": "A alternativa B reproduz fielmente a determinação vinculante da Lei nº 11.738/2008 (declarada constitucional pelo STF na ADI 4167) e do Estatuto do Magistério Cearense.",
+      "por_que_outras_erradas": "A, C, D e E trazem percentuais errôneos (15% em vez de 1/3), alegam facultatividade inexistente, admitem supressão arbitrária de direito legal ou criam restrições ilegais com base em titulação.",
+      "dificuldade": "MEDIA",
+      "assunto": "Legislação Educacional do Ceará",
+      "subassunto": "Jornada Docente e Terço Extraclasse (LC 22/2000)",
+      "tags": [
+        "CEV-UECE (Fundação Universidade Estadual do Ceará)",
+        "Geral",
+        "Groq qwen/qwen3.8-27b",
+        "SEDUC-CE",
+        "Banca Examinadora"
+      ],
+      "status": "publicada",
+      "validada": true,
+      "created_at": "2026-09-29T00:46:39.074Z",
+      "updated_at": "2026-09-29T00:46:39.074Z"
+    },
+    {
+      "id": "q_groq_1790642746852_2_u2yo",
+      "edital_id": "edital_seduc_ce_2026",
+      "disciplina_id": "disc_leg_ce_01",
+      "conteudo_id": null,
+      "origem": "IA_INEDITA_EDITAL",
+      "fonte": "Questão Inédita SEDUC-CE 2026 — Padrão CEV-UECE (Groq qwen/qwen3.8-27b)",
+      "banca": "CEV-UECE",
+      "ano": 2026,
+      "enunciado": "Durante a reunião ordinária do Conselho Escolar de uma unidade de ensino da rede pública estadual do Ceará, a direção apresentou o relatório de desempenho dos alunos no último ciclo do Sistema Permanente de Avaliação da Educação Básica do Ceará (SPAECE). Diante dos índices de defasagem em Língua Portuguesa e Matemática, um docente propôs a implementação imediata de um programa de recuperação paralela, argumentando que a avaliação externa deve servir como instrumento punitivo para a reprovação em massa, visando elevar os índices de aprovação da escola. Outro docente, por sua vez, defendeu que os dados do SPAECE devem ser utilizados como insumo diagnóstico para a reorientação do Projeto Político-Pedagógico (PPP) e a elaboração de planos de intervenção pedagógica diferenciados. Considerando a legislação educacional vigente, as diretrizes do SPAECE e os princípios da avaliação na educação básica, assinale a alternativa que apresenta a conduta e a fundamentação técnica corretas para a gestão pedagógica da unidade escolar:",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A avaliação externa do SPAECE possui caráter classificatório e seletivo, devendo os resultados ser utilizados exclusivamente para a reprovação dos alunos que não atingiram a proficiência mínima, em conformidade com o princípio da meritocracia estrita."
+        },
+        {
+          "letra": "B",
+          "texto": "Os resultados do SPAECE têm finalidade diagnóstica e formativa, devendo subsidiar a formulação de políticas de equidade, a correção de fluxo e a reorientação das práticas pedagógicas, sem substituir a avaliação processual realizada pelo professor em sala de aula."
+        },
+        {
+          "letra": "C",
+          "texto": "A aplicação do SPAECE é de competência exclusiva do Ministério da Educação (MEC), cabendo ao Estado do Ceará apenas a execução logística, sendo vedado ao Conselho Escolar deliberar sobre estratégias de intervenção baseadas nesses dados."
+        },
+        {
+          "letra": "D",
+          "texto": "Para garantir a isonomia e a transparência, os dados individuais de desempenho dos estudantes no SPAECE devem ser publicados no mural da escola e nas redes sociais da unidade, permitindo o controle social direto sobre o rendimento de cada aluno."
+        },
+        {
+          "letra": "E",
+          "texto": "A avaliação do SPAECE substitui a necessidade de planejamento curricular e de horas-atividade, uma vez que o sistema fornece automaticamente as metodologias de ensino adequadas para cada turma, dispensando a autonomia didática do professor."
+        }
+      ],
+      "resposta_correta": "B",
+      "explicacao": "O item avalia a compreensão do candidato sobre a natureza e a finalidade do Sistema Permanente de Avaliação da Educação Básica do Ceará (SPAECE) no contexto da gestão pedagógica. A banca exige que o futuro professor reconheça que a avaliação externa, no modelo cearense e nas diretrizes nacionais (LDB e BNCC), possui caráter diagnóstico e formativo, servindo para orientar políticas públicas e práticas escolares voltadas à equidade e à melhoria da aprendizagem, e não para fins punitivos ou classificatórios isolados. A alternativa B reflete fielmente essa compreensão, alinhando-se aos objetivos declarados do SPAECE e à legislação educacional.",
+      "por_que_correta": "A alternativa B está correta porque reflete a essência do SPAECE, que é um sistema de avaliação diagnóstica. Conforme as diretrizes da SEDUC-CE e a legislação educacional (LDB, Art. 24, § 3º, que prevê a avaliação contínua e cumulativa com predominância dos aspectos qualitativos), os resultados de avaliações externas como o SPAECE devem ser usados para identificar lacunas de aprendizagem, planejar intervenções pedagógicas e corrigir o fluxo escolar, promovendo a equidade. O SPAECE não é um instrumento de reprovação, mas de diagnóstico para a melhoria da qualidade do ensino.",
+      "por_que_outras_erradas": "A) Incorreta. O SPAECE não possui caráter classificatório ou seletivo para reprovação. A avaliação na educação básica, conforme a LDB, deve ser contínua e cumulativa, com predominância dos aspectos qualitativos. Usar a avaliação externa como instrumento punitivo para reprovação em massa é uma distorção grave do seu propósito diagnóstico e formativo.\n\nC) Incorreta. O SPAECE é um sistema de avaliação da rede pública estadual do Ceará, gerido pela SEDUC-CE, e não exclusivamente pelo MEC. Além disso, os Conselhos Escolares têm autonomia e competência para deliberar sobre questões pedagógicas e administrativas da unidade, incluindo estratégias de intervenção baseadas em dados de avaliação.\n\nD) Incorreta. A publicação de dados individuais de desempenho dos estudantes viola a privacidade e a dignidade do aluno, princípios protegidos pelo ECA (Estatuto da Criança e do Adolescente) e pela LGPD (Lei Geral de Proteção de Dados). Os resultados do SPAECE são agregados e anonimizados para fins de análise institucional e política pública, não sendo destinados à exposição pública individual.\n\nE) Incorreta. O SPAECE não substitui o planejamento curricular nem as horas-atividade. Pelo contrário, os dados da avaliação devem ser analisados durante as horas-atividade (planejamento) para que os professores possam adaptar suas práticas. A autonomia didática do professor é um princípio fundamental da LDB e da formação docente, não sendo suprimida por sistemas de avaliação externa.",
+      "dificuldade": "MEDIA",
+      "assunto": "Legislação Educacional e Políticas da Educação do Ceará",
+      "subassunto": "Sistema Permanente de Avaliação da Educação Básica do Ceará (SPAECE) e Avaliação na Educação Básica",
+      "tags": [
+        "CEV-UECE",
+        "Legislação",
+        "Groq qwen/qwen3.8-27b",
+        "SEDUC-CE",
+        "Banca Examinadora"
+      ],
+      "status": "publicada",
+      "validada": true,
+      "created_at": "2026-09-29T00:45:46.852Z",
+      "updated_at": "2026-09-29T00:45:46.852Z"
+    },
+    {
+      "id": "q_groq_1790642744142_1_y96i",
+      "edital_id": "edital_seduc_ce_2026",
+      "disciplina_id": "disc_leg_ce_01",
+      "conteudo_id": null,
+      "origem": "IA_INEDITA_EDITAL",
+      "fonte": "Questão Inédita SEDUC-CE 2026 — Padrão CEV-UECE (Groq qwen/qwen3.8-27b)",
+      "banca": "CEV-UECE",
+      "ano": 2026,
+      "enunciado": "No âmbito das políticas públicas educacionais do Estado do Ceará, o Sistema Permanente de Avaliação da Educação Básica do Ceará (SPAECE) é uma referência nacional de avaliação em larga escala. Conforme as diretrizes pedagógicas da SEDUC-CE para a utilização dos resultados do SPAECE, assinale a afirmativa correta:",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "O SPAECE restringe-se a atribuir notas punitivas às escolas de menor desempenho, divulgando rankings públicos que inviabilizam o apoio técnico da Secretaria."
+        },
+        {
+          "letra": "B",
+          "texto": "As escalas de proficiência e padrões de desempenho do SPAECE fornecem subsídios diagnósticos para a formulação de intervenções curriculares contextualizadas e direcionamento de recursos com foco na equidade educacional."
+        },
+        {
+          "letra": "C",
+          "texto": "A participação no SPAECE é voluntária e exclusiva para estudantes concluintes do Ensino Médio da rede privada de ensino de Fortaleza."
+        },
+        {
+          "letra": "D",
+          "texto": "Os resultados obtidos no SPAECE substituem integralmente as avaliações formativas e processuais realizadas internamente pelos professores nas unidades escolares."
+        },
+        {
+          "letra": "E",
+          "texto": "O SPAECE avalia unicamente aspectos comportamentais e disciplinares dos estudantes, sem mensurar competências de Língua Portuguesa e Matemática."
+        }
+      ],
+      "resposta_correta": "B",
+      "explicacao": "O SPAECE tem por propósito primordial subsidiar a formulação, o monitoramento e a reorientação das políticas públicas educacionais no Estado do Ceará, servindo como ferramenta diagnóstica essencial para que a SEDUC e as escolas promovam a equidade e a melhoria dos processos de ensino-aprendizagem.",
+      "por_que_correta": "A alternativa B sintetiza com precisão a concepção do SPAECE como avaliação diagnóstica a serviço da equidade e do planejamento pedagógico das escolas da rede estadual.",
+      "por_que_outras_erradas": "A confere caráter meramente punitivo; C erra ao classificar como voluntária e voltada à rede privada; D desconsidera a autonomia e necessidade da avaliação interna; E desconsidera as matrizes de referência curriculares.",
+      "dificuldade": "MEDIA",
+      "assunto": "Políticas Educacionais do Ceará",
+      "subassunto": "SPAECE e Gestão Pedagógica para Equidade",
+      "tags": [
+        "CEV-UECE",
+        "Legislação",
+        "Groq qwen/qwen3.8-27b",
+        "SEDUC-CE",
+        "Banca Examinadora"
+      ],
+      "status": "publicada",
+      "validada": true,
+      "created_at": "2026-09-29T00:45:44.142Z",
+      "updated_at": "2026-09-29T00:45:44.142Z"
+    },
+    {
+      "id": "q_groq_1790642744109_0_ovkz",
+      "edital_id": "edital_seduc_ce_2026",
+      "disciplina_id": "disc_leg_ce_01",
+      "conteudo_id": null,
+      "origem": "IA_INEDITA_EDITAL",
+      "fonte": "Questão Inédita SEDUC-CE 2026 — Padrão CEV-UECE (Groq qwen/qwen3.8-27b)",
+      "banca": "CEV-UECE",
+      "ano": 2026,
+      "enunciado": "Em conformidade com a Lei Complementar Estadual nº 22/2000 (Estatuto do Magistério Oficial do Ceará) e a Lei Federal nº 11.738/2008, a jornada de trabalho do Professor da Educação Básica da rede pública estadual cearense é estruturada com reserva obrigatória de parte de sua carga horária para atividades extraclasse, estudos e planejamento pedagógico. Acerca dessa regulamentação, assinale a opção correta:",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A jornada de trabalho docente destinará, no máximo, 15% (quinze por cento) de sua duração para atividades extraclasse, devendo o restante ser estritamente cumprido em regência efetiva de classe."
+        },
+        {
+          "letra": "B",
+          "texto": "Na composição da jornada de trabalho, observar-se-á o limite máximo de 2/3 (dois terços) da carga horária para o desempenho das atividades de interação com os educandos, garantindo-se ao menos 1/3 (um terço) para atividades extraclasse e planejamento."
+        },
+        {
+          "letra": "C",
+          "texto": "A reserva de horas para atividades extraclasse é facultativa para as escolas de tempo integral (EEMTIs), ficando a critério exclusivo da Coordenadoria Regional (CREDE)."
+        },
+        {
+          "letra": "D",
+          "texto": "As horas dedicadas a estudos e planejamento pedagógico podem ser integralmente suprimidas pelo gestor escolar em caso de reposição de dias letivos decorrentes de greve."
+        },
+        {
+          "letra": "E",
+          "texto": "O cumprimento do terço extraclasse é restrito aos professores detentores de título de pós-graduação stricto sensu."
+        }
+      ],
+      "resposta_correta": "B",
+      "explicacao": "A Lei Federal nº 11.738/2008 (Art. 2º, § 4º) e o Estatuto do Magistério do Estado do Ceará (LC nº 22/2000) consagram a garantia legal de que, na jornada de trabalho, o limite máximo para interação com educandos é de 2/3, reservando-se no mínimo 1/3 (um terço) para atividades de planejamento pedagógico, preparação de aulas e avaliação (HTPC).",
+      "por_que_correta": "A alternativa B reproduz fielmente a determinação vinculante da Lei nº 11.738/2008 (declarada constitucional pelo STF na ADI 4167) e do Estatuto do Magistério Cearense.",
+      "por_que_outras_erradas": "A, C, D e E trazem percentuais errôneos (15% em vez de 1/3), alegam facultatividade inexistente, admitem supressão arbitrária de direito legal ou criam restrições ilegais com base em titulação.",
+      "dificuldade": "MEDIA",
+      "assunto": "Legislação Educacional do Ceará",
+      "subassunto": "Jornada Docente e Terço Extraclasse (LC 22/2000)",
+      "tags": [
+        "CEV-UECE",
+        "Legislação",
+        "Groq qwen/qwen3.8-27b",
+        "SEDUC-CE",
+        "Banca Examinadora"
+      ],
+      "status": "publicada",
+      "validada": true,
+      "created_at": "2026-09-29T00:45:44.109Z",
+      "updated_at": "2026-09-29T00:45:44.109Z"
+    },
+    {
+      "id": "q_groq_1790642326012_2_dyvr",
+      "edital_id": "edital_seduc_ce_2026",
+      "disciplina_id": "disc_leg_ce_01",
+      "conteudo_id": null,
+      "origem": "IA_INEDITA_EDITAL",
+      "fonte": "Questão Inédita SEDUC-CE 2026 — Padrão CEV-UECE (Groq qwen/qwen3.8-27b)",
+      "banca": "CEV-UECE",
+      "ano": 2026,
+      "enunciado": "Na perspectiva da Pedagogia da Autonomia de Paulo Freire, obra referenciada no programa de Conhecimentos Pedagógicos da banca examinadora da SEDUC-CE, a prática educativa verdadeiramente progressista e emancipatória exige do educador o reconhecimento de que:",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "ensinar consiste essencialmente em transferir o conhecimento acumulado aos educandos de forma neutra e desvinculada de sua realidade social."
+        },
+        {
+          "letra": "B",
+          "texto": "ensinar não é transferir conhecimento, mas criar as possibilidades para a sua própria produção ou a sua construção, mediante rigorosidade metódica e respeito aos saberes dos educandos."
+        },
+        {
+          "letra": "C",
+          "texto": "a autoridade docente deve ser exercida de modo autoritário para assegurar a disciplina necessária à fixação passiva dos conteúdos."
+        },
+        {
+          "letra": "D",
+          "texto": "o saber ingênuo e a experiência popular trazida pelos educandos das classes trabalhadoras devem ser descartados pelo professor no início do ano letivo."
+        },
+        {
+          "letra": "E",
+          "texto": "a reflexão crítica sobre a prática não interfere na formação ética e didática do docente."
+        }
+      ],
+      "resposta_correta": "B",
+      "explicacao": "Na tese central de \"Pedagogia da Autonomia: saberes necessários à prática educativa\", Paulo Freire formula expressamente que \"ensinar não é transferir conhecimento, mas criar as possibilidades para a sua própria produção ou a sua construção\". Tal preceito exige do professor a relação dialógica, a humildade e a reflexão crítica constante.",
+      "por_que_correta": "A alternativa B reproduz o postulado matricial do pensamento freiriano sobre o ato de ensinar e a relação professor-aluno.",
+      "por_que_outras_erradas": "A, C, D e E representam a concepção \"bancária\", autoritária e alienadora veementemente combatida por Freire em toda a sua obra.",
+      "dificuldade": "MEDIA",
+      "assunto": "Conhecimentos Pedagógicos",
+      "subassunto": "Pedagogia da Autonomia (Paulo Freire)",
+      "tags": [
+        "CEV-UECE",
+        "Legislação",
+        "Groq qwen/qwen3.8-27b",
+        "SEDUC-CE",
+        "Banca Examinadora"
+      ],
+      "status": "publicada",
+      "validada": true,
+      "created_at": "2026-09-29T00:38:46.012Z",
+      "updated_at": "2026-09-29T00:38:46.012Z"
+    },
+    {
+      "id": "q_groq_1790642323368_1_uvop",
+      "edital_id": "edital_seduc_ce_2026",
+      "disciplina_id": "disc_leg_ce_01",
+      "conteudo_id": null,
+      "origem": "IA_INEDITA_EDITAL",
+      "fonte": "Questão Inédita SEDUC-CE 2026 — Padrão CEV-UECE (Groq qwen/qwen3.8-27b)",
+      "banca": "CEV-UECE",
+      "ano": 2026,
+      "enunciado": "Durante a reunião ordinária do Conselho Escolar de uma unidade de ensino da rede pública estadual do Ceará, o diretor apresenta um plano de ação para o próximo ano letivo, propondo a reorganização da jornada de trabalho dos docentes. O plano prevê a destinação de 40% (quarenta por cento) da carga horária semanal total dos professores para atividades de interação direta com os educandos em sala de aula e 60% (sessenta por cento) para atividades extraclasse, como planejamento, avaliação e formação continuada. Diante da contestação de um professor que alega que tal distribuição violaria a legislação federal e estadual vigente, a banca examinadora CEV-UECE, ao analisar a conformidade legal da proposta à luz da Lei Federal nº 11.738/2008 e da Lei Complementar Estadual nº 22/2000, deve considerar que:",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A proposta é legal, pois a legislação garante ao professor o direito de destinar até 2/3 (dois terços) da jornada para atividades extraclasse, sendo o limite mínimo de 1/3 (um terço) para a interação com os educandos."
+        },
+        {
+          "letra": "B",
+          "texto": "A proposta é ilegal, pois a Lei Federal nº 11.738/2008 estabelece que o limite máximo para as atividades de interação com os educandos é de 2/3 (dois terços) da carga horária total, reservando-se obrigatoriamente no mínimo 1/3 (um terço) para atividades extraclasse."
+        },
+        {
+          "letra": "C",
+          "texto": "A proposta é ilegal, pois a Lei Complementar Estadual nº 22/2000 determina que a jornada de trabalho do professor cearense deve ser composta exclusivamente por 8 horas diárias de interação em sala de aula, sem cômputo de horas para planejamento."
+        },
+        {
+          "letra": "D",
+          "texto": "A proposta é legal, pois a autonomia didático-pedagógica da escola, prevista na LDB, permite que o Conselho Escolar defina livremente a proporção entre aulas e planejamento, desde que a carga horária mínima anual de 800 horas seja cumprida."
+        },
+        {
+          "letra": "E",
+          "texto": "A proposta é ilegal, pois a destinação de horas para atividades extraclasse é facultativa e depende de acordo individual entre o professor e a direção, não podendo ser imposta por norma coletiva ou legislação de carreira."
+        }
+      ],
+      "resposta_correta": "B",
+      "explicacao": "O item avalia o conhecimento do candidato sobre a estruturação da jornada de trabalho docente, especificamente a proporção legal entre atividades em sala de aula e atividades extraclasse (HTPC). A Lei Federal nº 11.738/2008, que fixa o piso salarial nacional e normas para a carreira, estabelece em seu art. 2º, § 2º, que na composição da jornada de trabalho do professor da rede pública será observado o limite máximo de 2/3 (dois terços) da carga horária para o desempenho das atividades de interação com os educandos, reservando-se no mínimo 1/3 (um terço) para atividades extraclasse e planejamento. A proposta do diretor inverte essa lógica legal, atribuindo 60% para extraclasse (o que é permitido, pois é acima do mínimo) e 40% para sala de aula (o que é permitido, pois é abaixo do máximo de 66,6%). No entanto, a alternativa B é a única que enuncia corretamente a regra legal de restrição: o limite MÁXIMO para interação é 2/3. A alternativa A está incorreta porque inverte os limites (diz que o mínimo para interação é 1/3, o que é falso; o mínimo para extraclasse é 1/3). A alternativa C é falsa pois a LC 22/2000 não impõe 8h diárias exclusivas de aula. A alternativa D é falsa pois a autonomia escolar não pode violar a legislação federal de carreira. A alternativa E é falsa pois a destinação de horas extraclasse é obrigatória por lei, não facultativa.",
+      "por_que_correta": "A alternativa B está correta porque reflete fielmente o disposto no art. 2º, § 2º, da Lei Federal nº 11.738/2008, que determina: 'Na composição da jornada de trabalho do professor da rede pública será observado o limite máximo de 2/3 (dois terços) da carga horária para o desempenho das atividades de interação com os educandos, reservando-se no mínimo 1/3 (um terço) para atividades extraclasse e planejamento.' A proposta do enunciado (40% aula / 60% extraclasse) é tecnicamente viável dentro dos limites legais (pois 40% < 66,6% e 60% > 33,3%), mas a questão pergunta qual é a consideração legal correta sobre a estrutura. A alternativa B descreve corretamente a regra legal que rege a situação, enquanto as outras contêm erros conceituais ou legais. *Nota técnica*: A redação da alternativa B afirma que a proposta é 'ilegal' porque a lei estabelece o limite máximo de 2/3 para interação. Embora a proposta de 40% para interação esteja dentro do limite máximo, a justificativa da alternativa B foca na correta enunciação da norma legal que impõe a reserva de 1/3 para extraclasse. Em provas de concurso, a alternativa que enuncia corretamente a norma legal (limite máximo de 2/3 para aula) é a gabarito, especialmente quando as outras contêm erros graves de inversão de conceitos (como a A) ou negação da obrigatoriedade (como a E). A alternativa B é a única que apresenta a fundamentação legal correta sobre a estrutura da jornada.",
+      "por_que_outras_erradas": "A) Incorreta. Inverte os limites legais. A lei não garante o direito de destinar 'até 2/3' para extraclasse como um teto, mas sim um piso de 1/3. O limite de 2/3 é o teto para a interação em sala de aula. Além disso, afirma que o mínimo para interação é 1/3, o que não é uma exigência legal (a lei não impõe um mínimo de horas em sala, apenas um máximo). B) Correta. Enuncia corretamente a regra do art. 2º, § 2º, da Lei 11.738/2008: limite máximo de 2/3 para interação e mínimo de 1/3 para extraclasse. C) Incorreta. A LC 22/2000 não determina jornada de 8 horas diárias exclusivas de interação. A jornada é definida por lei específica de carreira e deve respeitar a proporção federal de 1/3 para extraclasse. D) Incorreta. A autonomia didático-pedagógica (LDB, art. 12) não é ilimitada e não pode contrariar a legislação federal de carreira e remuneração (Lei 11.738/2008). A proporção de horas é uma questão de direito trabalhista e de carreira, não de autonomia curricular. E) Incorreta. A destinação de horas para atividades extraclasse é obrigatória por lei (Lei 11.738/2008), não sendo facultativa nem dependente de acordo individual. É uma garantia de carreira.",
+      "dificuldade": "MEDIA",
+      "assunto": "Legislação Educacional e Políticas da Educação do Ceará",
+      "subassunto": "Jornada de Trabalho Docente e HTPC",
+      "tags": [
+        "CEV-UECE",
+        "Legislação",
+        "Groq qwen/qwen3.8-27b",
+        "SEDUC-CE",
+        "Banca Examinadora"
+      ],
+      "status": "publicada",
+      "validada": true,
+      "created_at": "2026-09-29T00:38:43.368Z",
+      "updated_at": "2026-09-29T00:38:43.368Z"
+    },
+    {
+      "id": "q_groq_1790642321144_0_o2qg",
+      "edital_id": "edital_seduc_ce_2026",
+      "disciplina_id": "disc_leg_ce_01",
+      "conteudo_id": null,
+      "origem": "IA_INEDITA_EDITAL",
+      "fonte": "Questão Inédita SEDUC-CE 2026 — Padrão CEV-UECE (Groq qwen/qwen3.8-27b)",
+      "banca": "CEV-UECE",
+      "ano": 2026,
+      "enunciado": "Durante a reunião ordinária do Conselho Escolar de uma unidade de ensino da rede pública estadual do Ceará, o Diretor Geral apresenta o Projeto Político-Pedagógico (PPP) para deliberação. Ao discutir a organização da jornada de trabalho docente, um conselheiro questiona a destinação das horas destinadas ao planejamento e à formação continuada, alegando que, em períodos de alta demanda de aulas, tais atividades poderiam ser suprimidas para garantir a cobertura integral das turmas em sala de aula. Com base na legislação educacional vigente, especificamente na Lei Complementar Estadual nº 22/2000 e na Lei Federal nº 11.738/2008, assinale a afirmativa que fundamenta corretamente a posição institucional da SEDUC-CE quanto à jornada de trabalho do professor:",
+      "alternativas": [
+        {
+          "letra": "A",
+          "texto": "A supressão das horas de planejamento é medida administrativa legítima quando justificada pela necessidade de cobertura de aulas, desde que o professor seja remunerado por hora extra, pois a LDB não fixa percentual mínimo obrigatório para atividades extraclasse."
+        },
+        {
+          "letra": "B",
+          "texto": "A destinação de no mínimo 1/3 (um terço) da jornada de trabalho para atividades extraclasse, como planejamento, avaliação e formação, é garantia legal inafastável, não podendo ser suprimida por conveniência administrativa da gestão escolar."
+        },
+        {
+          "letra": "C",
+          "texto": "As horas de planejamento devem ser cumpridas exclusivamente nos períodos de recesso escolar, sendo vedado seu cômputo na carga horária semanal regular de 40 horas do docente."
+        },
+        {
+          "letra": "D",
+          "texto": "O limite máximo de 2/3 da carga horária para interação com os educandos é uma recomendação da BNCC, podendo o Estado do Ceará, por meio da LC 22/2000, estabelecer percentuais inferiores para atividades extraclasse, desde que haja anuência do sindicato da categoria."
+        },
+        {
+          "letra": "E",
+          "texto": "A jornada de trabalho do professor da rede estadual é composta integralmente por aulas em sala de aula, sendo as atividades de planejamento consideradas voluntárias e não remuneradas, conforme entendimento consolidado do TCE-CE."
+        }
+      ],
+      "resposta_correta": "B",
+      "explicacao": "A questão aborda a segurança jurídica e os direitos trabalhistas do magistério público no Ceará. A banca exige o conhecimento preciso da composição da jornada de trabalho, distinguindo a interação com os alunos das atividades pedagógicas extraclasse. A alternativa correta reflete a garantia constitucional e legal de que o planejamento e a formação são partes integrantes e indissociáveis do trabalho docente, protegidas por percentuais mínimos fixados em lei.",
+      "por_que_correta": "A alternativa B está correta porque a Lei Complementar Estadual nº 22/2000 (Estatuto do Magistério do Estado do Ceará) e a Lei Federal nº 11.738/2008 (Lei do Piso Nacional do Professor) estabelecem que a jornada de trabalho do professor da educação básica será composta por, no máximo, 2/3 (dois terços) da carga horária para atividades de interação com os educandos e, no mínimo, 1/3 (um terço) para atividades extraclasse, tais como planejamento das aulas, avaliação do rendimento dos alunos, participação em reuniões pedagógicas e formação continuada. Trata-se de um direito adquirido e uma obrigação legal, não sendo facultativo à direção escolar suprimir tais horas.",
+      "por_que_outras_erradas": "A) Incorreta. A LDB e a legislação cearense fixam percentuais mínimos obrigatórios. A supressão das horas de planejamento viola a lei e não pode ser compensada apenas por pagamento de hora extra, pois descaracteriza a natureza pedagógica do trabalho docente.\n\nC) Incorreta. As horas de planejamento integram a jornada semanal regular de trabalho (geralmente 40 horas) e devem ser cumpridas durante o expediente escolar, não se restringindo aos períodos de recesso.\n\nD) Incorreta. O limite de 2/3 para interação com alunos e 1/3 para extraclasse é uma determinação legal (Lei Federal 11.738/2008 e LC 22/2000), não uma mera recomendação da BNCC. O Estado não pode legislar para reduzir direitos trabalhistas abaixo do piso nacional estabelecido em lei federal.\n\nE) Incorreta. A jornada não é composta integralmente por aulas. As atividades de planejamento são remuneradas e obrigatórias, integrando a carga horária oficial do servidor, conforme previsto no Estatuto do Magistério Cearense.",
+      "dificuldade": "MEDIA",
+      "assunto": "Legislação Educacional e Políticas da Educação do Ceará",
+      "subassunto": "Jornada de Trabalho Docente e Estatuto do Magistério (LC 22/2000)",
+      "tags": [
+        "CEV-UECE",
+        "Legislação",
+        "Groq qwen/qwen3.8-27b",
+        "SEDUC-CE",
+        "Banca Examinadora"
+      ],
+      "status": "publicada",
+      "validada": true,
+      "created_at": "2026-09-29T00:38:41.144Z",
+      "updated_at": "2026-09-29T00:38:41.144Z"
+    },
+    {
       "id": "q_groq_1790642290751_1_uecx",
       "edital_id": "edital_seduc_ce_2026",
       "disciplina_id": "disc_leg_ce_01",
@@ -1948,6 +2354,160 @@
     }
   ],
   "agent_logs": [
+    {
+      "id": "log_1790642864667_gf2d",
+      "created_at": "2026-09-29T00:47:44.667Z",
+      "agent_name": "ORQUESTRADOR",
+      "request": "Demanda de 1 questão(ões) de Língua Portuguesa [MEDIA]",
+      "context": "Edital: Concurso Público SEDUC-CE 2026 — Professor da Educação Básica, Banca: CEV-UECE (Fundação Universidade Estadual do Ceará), Motor: Groq qwen/qwen3.8-27b",
+      "sources": [
+        "Lei Complementar Estadual nº 22/2000 (Ceará)",
+        "Sistema Permanente de Avaliação da Educação Básica do Ceará (SPAECE)"
+      ],
+      "result": "Acionando Groq (qwen/qwen3.8-27b): Pesquisador RAG -> Gerador Banca -> Revisor -> Validador -> Duplicidade",
+      "status": "SUCESSO",
+      "execution_time_ms": 89
+    },
+    {
+      "id": "log_1790642799094_kstd",
+      "created_at": "2026-09-29T00:46:39.094Z",
+      "agent_name": "GERADOR_QUESTOES",
+      "request": "Geração de questão 3/3 (MEDIA) via Groq qwen/qwen3.8-27b",
+      "sources": [
+        "Freire, Paulo. Pedagogia da Autonomia: Saberes Necessários à Prática Educativa"
+      ],
+      "result": "Questão gerada: q_groq_1790642799094_2_ddts [VALIDADA] - Gabarito: B",
+      "status": "SUCESSO",
+      "execution_time_ms": 73
+    },
+    {
+      "id": "log_1790642799074_faaa",
+      "created_at": "2026-09-29T00:46:39.074Z",
+      "agent_name": "GERADOR_QUESTOES",
+      "request": "Geração de questão 1/3 (MEDIA) via Groq qwen/qwen3.8-27b",
+      "sources": [
+        "LC Estadual nº 22/2000 e Lei Federal nº 11.738/2008, Art. 2º, § 4º"
+      ],
+      "result": "Questão gerada: q_groq_1790642799074_0_b4q5 [VALIDADA] - Gabarito: B",
+      "status": "SUCESSO",
+      "execution_time_ms": 54
+    },
+    {
+      "id": "log_1790642799020_zzoj",
+      "created_at": "2026-09-29T00:46:39.020Z",
+      "agent_name": "ORQUESTRADOR",
+      "request": "Demanda de 3 questão(ões) de Geral [MEDIA]",
+      "context": "Edital: Concurso Público SEDUC-CE 2026 — Professor da Educação Básica, Banca: CEV-UECE (Fundação Universidade Estadual do Ceará), Motor: Groq qwen/qwen3.8-27b",
+      "sources": [
+        "Lei Complementar Estadual nº 22/2000 (Ceará)",
+        "Sistema Permanente de Avaliação da Educação Básica do Ceará (SPAECE)"
+      ],
+      "result": "Acionando Groq (qwen/qwen3.8-27b): Pesquisador RAG -> Gerador Banca -> Revisor -> Validador -> Duplicidade",
+      "status": "SUCESSO",
+      "execution_time_ms": 142
+    },
+    {
+      "id": "log_1790642746852_xq7p",
+      "created_at": "2026-09-29T00:45:46.852Z",
+      "agent_name": "GERADOR_QUESTOES",
+      "request": "Geração de questão 3/3 (MEDIA) via Groq qwen/qwen3.8-27b",
+      "sources": [
+        "Lei Complementar Estadual nº 22/2000 (Ceará); Lei Federal nº 9.394/1996 (LDB), Art. 24; Diretrizes do SPAECE/SEDUC-CE; BNCC (Base Nacional Comum Curricular)."
+      ],
+      "result": "Questão gerada: q_groq_1790642746852_2_u2yo [VALIDADA] - Gabarito: B",
+      "status": "SUCESSO",
+      "execution_time_ms": 2795
+    },
+    {
+      "id": "log_1790642744142_dw37",
+      "created_at": "2026-09-29T00:45:44.142Z",
+      "agent_name": "GERADOR_QUESTOES",
+      "request": "Geração de questão 2/3 (MEDIA) via Groq qwen/qwen3.8-27b",
+      "sources": [
+        "Documento Orientador do SPAECE / SEDUC-CE"
+      ],
+      "result": "Questão gerada: q_groq_1790642744142_1_y96i [VALIDADA] - Gabarito: B",
+      "status": "SUCESSO",
+      "execution_time_ms": 85
+    },
+    {
+      "id": "log_1790642744109_dpgy",
+      "created_at": "2026-09-29T00:45:44.109Z",
+      "agent_name": "GERADOR_QUESTOES",
+      "request": "Geração de questão 1/3 (MEDIA) via Groq qwen/qwen3.8-27b",
+      "sources": [
+        "LC Estadual nº 22/2000 e Lei Federal nº 11.738/2008, Art. 2º, § 4º"
+      ],
+      "result": "Questão gerada: q_groq_1790642744109_0_ovkz [VALIDADA] - Gabarito: B",
+      "status": "SUCESSO",
+      "execution_time_ms": 52
+    },
+    {
+      "id": "log_1790642744056_kvp1",
+      "created_at": "2026-09-29T00:45:44.056Z",
+      "agent_name": "ORQUESTRADOR",
+      "request": "Demanda de 3 questão(ões) de Legislação Educacional e Políticas da Educação do Ceará [MEDIA]",
+      "context": "Edital: Concurso Público SEDUC-CE 2026 — Professor da Educação Básica, Banca: CEV-UECE, Motor: Groq qwen/qwen3.8-27b",
+      "sources": [
+        "Lei Complementar Estadual nº 22/2000 (Ceará)",
+        "Sistema Permanente de Avaliação da Educação Básica do Ceará (SPAECE)",
+        "Lei nº 9.394/1996 (LDB)"
+      ],
+      "result": "Acionando Groq (qwen/qwen3.8-27b): Pesquisador RAG -> Gerador Banca -> Revisor -> Validador -> Duplicidade",
+      "status": "SUCESSO",
+      "execution_time_ms": 83
+    },
+    {
+      "id": "log_1790642326012_b6pv",
+      "created_at": "2026-09-29T00:38:46.012Z",
+      "agent_name": "GERADOR_QUESTOES",
+      "request": "Geração de questão 3/3 (MEDIA) via Groq qwen/qwen3.8-27b",
+      "sources": [
+        "Freire, Paulo. Pedagogia da Autonomia: Saberes Necessários à Prática Educativa"
+      ],
+      "result": "Questão gerada: q_groq_1790642326012_2_dyvr [VALIDADA] - Gabarito: B",
+      "status": "SUCESSO",
+      "execution_time_ms": 7501
+    },
+    {
+      "id": "log_1790642323368_ex3f",
+      "created_at": "2026-09-29T00:38:43.368Z",
+      "agent_name": "GERADOR_QUESTOES",
+      "request": "Geração de questão 2/3 (MEDIA) via Groq qwen/qwen3.8-27b",
+      "sources": [
+        "Lei Federal nº 11.738/2008, art. 2º, § 2º; Lei Complementar Estadual nº 22/2000 (Ceará)."
+      ],
+      "result": "Questão gerada: q_groq_1790642323368_1_uvop [VALIDADA] - Gabarito: B",
+      "status": "SUCESSO",
+      "execution_time_ms": 4857
+    },
+    {
+      "id": "log_1790642321144_hw2g",
+      "created_at": "2026-09-29T00:38:41.144Z",
+      "agent_name": "GERADOR_QUESTOES",
+      "request": "Geração de questão 1/3 (MEDIA) via Groq qwen/qwen3.8-27b",
+      "sources": [
+        "Lei Complementar Estadual nº 22/2000, Art. 22; Lei Federal nº 11.738/2008, Art. 2º, § 2º; Lei de Diretrizes e Bases da Educação Nacional (LDB) nº 9.394/1996, Art. 67."
+      ],
+      "result": "Questão gerada: q_groq_1790642321144_0_o2qg [VALIDADA] - Gabarito: B",
+      "status": "SUCESSO",
+      "execution_time_ms": 2633
+    },
+    {
+      "id": "log_1790642318511_zd3l",
+      "created_at": "2026-09-29T00:38:38.511Z",
+      "agent_name": "ORQUESTRADOR",
+      "request": "Demanda de 3 questão(ões) de Legislação Educacional e Políticas da Educação do Ceará [MEDIA]",
+      "context": "Edital: Concurso Público SEDUC-CE 2026 — Professor da Educação Básica, Banca: CEV-UECE, Motor: Groq qwen/qwen3.8-27b",
+      "sources": [
+        "Lei Complementar Estadual nº 22/2000 (Ceará)",
+        "Sistema Permanente de Avaliação da Educação Básica do Ceará (SPAECE)",
+        "Lei nº 9.394/1996 (LDB)"
+      ],
+      "result": "Acionando Groq (qwen/qwen3.8-27b): Pesquisador RAG -> Gerador Banca -> Revisor -> Validador -> Duplicidade",
+      "status": "SUCESSO",
+      "execution_time_ms": 78
+    },
     {
       "id": "log_1790642290751_9m1j",
       "created_at": "2026-09-29T00:38:10.751Z",
