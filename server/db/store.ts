@@ -31,7 +31,8 @@ export interface DatabaseSchema {
   rag_documents: RagDocument[];
 }
 
-const DB_DIR = path.resolve(process.cwd(), 'data');
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const DB_DIR = isServerless ? path.join('/tmp', 'seduc_data') : path.resolve(process.cwd(), 'data');
 const DB_FILE = path.join(DB_DIR, 'seduc_db.json');
 
 class DatabaseStore {
@@ -55,7 +56,11 @@ class DatabaseStore {
 
         // Se o banco contiver o edital antigo ou não tiver o edital SEDUC-CE 2026, reinicializar com o novo edital
         if (!parsed.editais?.some(e => e.id === 'edital_seduc_ce_2026')) {
-          fs.writeFileSync(DB_FILE, JSON.stringify(seed, null, 2), 'utf-8');
+          try {
+            fs.writeFileSync(DB_FILE, JSON.stringify(seed, null, 2), 'utf-8');
+          } catch (writeErr) {
+            console.warn('[DB] Sistema de arquivos somente leitura, operando em memória:', writeErr);
+          }
           return seed;
         }
 
@@ -83,7 +88,7 @@ class DatabaseStore {
         };
       }
     } catch (err) {
-      console.error('[DB] Erro ao carregar banco de dados, iniciando do seed:', err);
+      console.warn('[DB] Aviso ao acessar disco no ambiente serverless, usando seed em memória:', err);
     }
 
     const seed = getInitialSeedData();
@@ -92,12 +97,17 @@ class DatabaseStore {
   }
 
   private persistSync(data: DatabaseSchema) {
-    if (!fs.existsSync(DB_DIR)) {
-      fs.mkdirSync(DB_DIR, { recursive: true });
+    try {
+      if (!fs.existsSync(DB_DIR)) {
+        fs.mkdirSync(DB_DIR, { recursive: true });
+      }
+      const tmpFile = `${DB_FILE}.tmp`;
+      fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2), 'utf-8');
+      fs.renameSync(tmpFile, DB_FILE);
+    } catch (err) {
+      // Em ambientes serverless read-only como Vercel/Lambda, salvar em memória sem falhar
+      console.warn('[DB] Persistência em disco ignorada (ambiente somente leitura):', err);
     }
-    const tmpFile = `${DB_FILE}.tmp`;
-    fs.writeFileSync(tmpFile, JSON.stringify(data, null, 2), 'utf-8');
-    fs.renameSync(tmpFile, DB_FILE);
   }
 
   public save() {

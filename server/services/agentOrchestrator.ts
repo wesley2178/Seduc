@@ -100,10 +100,10 @@ Fundamentação: ${q.explicacao}`);
       execution_time_ms: Date.now() - startTime
     });
 
-    const generatedQuestoes: Questao[] = [];
     const groq = getGroq();
 
-    for (let i = 0; i < params.quantidade; i++) {
+    // Execução paralela e com proteção de timeout para evitar travamento em ambientes serverless (Vercel)
+    const questionPromises = Array.from({ length: params.quantidade }).map(async (_, i) => {
       const qStart = Date.now();
       let rawQuestao: any = null;
 
@@ -150,7 +150,12 @@ RETORNE OBRIGATORIAMENTE EM FORMATO JSON ESTRUTURADO COM AS SEGUINTES CHAVES EXA
   "referencia_legal": "Dispositivo legal ou autor/obra correspondente"
 }`;
 
-          const completion = await groq.chat.completions.create({
+          // Limite de 7.5s por requisição para não ultrapassar o timeout de 10s da Vercel
+          const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Groq request timeout')), 7500)
+          );
+
+          const groqPromise = groq.chat.completions.create({
             model: GROQ_MODEL,
             messages: [
               {
@@ -167,16 +172,17 @@ RETORNE OBRIGATORIAMENTE EM FORMATO JSON ESTRUTURADO COM AS SEGUINTES CHAVES EXA
             max_tokens: 3000
           });
 
+          const completion = await Promise.race([groqPromise, timeoutPromise]);
           const responseText = completion.choices[0]?.message?.content?.trim() || '';
           rawQuestao = JSON.parse(responseText);
         } catch (err: any) {
-          console.warn('[Groq Llama 3.3 Gen] Erro na geração com Groq:', err.message);
+          console.warn(`[Groq Llama 3.3 Gen] Erro ou timeout na questão ${i + 1}:`, err.message);
         }
       } else {
         console.warn('[Groq] GROQ_API_KEY não configurada no ambiente. Utilizando gerador calibrado da banca CEV-UECE.');
       }
 
-      // Fallback calibrado e autêntico se a Groq não responder ou se a chave não estiver configurada
+      // Fallback calibrado e autêntico se a Groq não responder, der timeout ou se a chave não estiver configurada
       if (!rawQuestao || !rawQuestao.enunciado || !Array.isArray(rawQuestao.alternativas) || rawQuestao.alternativas.length !== 5) {
         rawQuestao = this.generateCalibratedQuestion(disciplina?.nome || '', conteudo?.nome || '', banca, dificuldade, i);
       }
@@ -216,7 +222,6 @@ RETORNE OBRIGATORIAMENTE EM FORMATO JSON ESTRUTURADO COM AS SEGUINTES CHAVES EXA
       };
 
       db.addQuestao(novaQuestao);
-      generatedQuestoes.push(novaQuestao);
 
       db.addLog({
         agent_name: 'GERADOR_QUESTOES',
@@ -226,8 +231,11 @@ RETORNE OBRIGATORIAMENTE EM FORMATO JSON ESTRUTURADO COM AS SEGUINTES CHAVES EXA
         status: validationResult.resultado === 'VALIDADA' ? 'SUCESSO' : 'AVISO',
         execution_time_ms: Date.now() - qStart
       });
-    }
 
+      return novaQuestao;
+    });
+
+    const generatedQuestoes = await Promise.all(questionPromises);
     return generatedQuestoes;
   }
 

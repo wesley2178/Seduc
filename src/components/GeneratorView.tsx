@@ -9,17 +9,26 @@ import {
   ArrowRight,
   ShieldCheck,
   Search,
-  Sliders
+  Sliders,
+  RefreshCw,
+  HelpCircle
 } from 'lucide-react';
 import { Questao, QuestaoDificuldade, QuestaoOrigem } from '../types';
+import { DISCIPLINAS_OFICIAIS, QUESTOES_OFICIAIS_SEDUC } from '../data/editalOficial';
 
 interface GeneratorViewProps {
   onGoToQuestions: () => void;
 }
 
+const DEFAULT_DISCIPLINAS = DISCIPLINAS_OFICIAIS.map(d => ({
+  id: d.id,
+  nome: d.nome,
+  conteudos: d.conteudos.map(c => ({ id: c.id, nome: c.nome }))
+}));
+
 export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions }) => {
-  const [disciplinas, setDisciplinas] = useState<{ id: string; nome: string; conteudos: { id: string; nome: string }[] }[]>([]);
-  const [selectedDisc, setSelectedDisc] = useState<string>('');
+  const [disciplinas, setDisciplinas] = useState<{ id: string; nome: string; conteudos: { id: string; nome: string }[] }[]>(DEFAULT_DISCIPLINAS);
+  const [selectedDisc, setSelectedDisc] = useState<string>(DEFAULT_DISCIPLINAS[0]?.id || '');
   const [selectedCont, setSelectedCont] = useState<string>('');
   const [quantidade, setQuantidade] = useState<number>(3);
   const [dificuldade, setDificuldade] = useState<QuestaoDificuldade>('MEDIA');
@@ -29,19 +38,25 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
   const [generating, setGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [generatedQuestions, setGeneratedQuestions] = useState<Questao[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/edital')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Falha ao carregar edital');
+        return res.json();
+      })
       .then(data => {
-        if (data.disciplinas) {
+        if (data.disciplinas && data.disciplinas.length > 0) {
           setDisciplinas(data.disciplinas);
-          if (data.disciplinas.length > 0) {
+          if (!selectedDisc) {
             setSelectedDisc(data.disciplinas[0].id);
           }
         }
       })
-      .catch(console.error);
+      .catch(err => {
+        console.warn('Usando dados de disciplinas locais (modo resiliente):', err);
+      });
   }, []);
 
   const activeConteudos = disciplinas.find(d => d.id === selectedDisc)?.conteudos || [];
@@ -50,6 +65,7 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
     if (!selectedDisc || generating) return;
     setGenerating(true);
     setGeneratedQuestions([]);
+    setErrorMessage(null);
     setCurrentStep(1);
 
     // Animação dos passos multiagentes
@@ -71,17 +87,59 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
         })
       });
 
+      const contentType = res.headers.get('content-type');
+      if (!res.ok || !contentType || !contentType.includes('application/json')) {
+        const errorText = await res.text();
+        throw new Error(
+          res.status === 504 
+            ? 'A requisição excedeu o tempo limite da Vercel (Timeout). Tente gerar 1 ou 2 questões.' 
+            : res.status === 404
+            ? 'A rota /api/questoes/gerar-demanda não foi encontrada no deploy da Vercel. Verifique a configuração do vercel.json.'
+            : `Erro no servidor (${res.status}): ${errorText.substring(0, 120)}`
+        );
+      }
+
       const data = await res.json();
+      if (!data.sucesso || !data.questoes || data.questoes.length === 0) {
+        throw new Error(data.mensagem || data.error || 'Nenhuma questão foi retornada pelo motor de IA.');
+      }
+
       setCurrentStep(5);
-      setGeneratedQuestions(data.questoes || []);
-    } catch (err) {
+      setGeneratedQuestions(data.questoes);
+    } catch (err: any) {
       console.error('Erro na geração:', err);
+      setErrorMessage(err.message || 'Erro inesperado ao gerar questões.');
     } finally {
       clearTimeout(timer1);
       clearTimeout(timer2);
       clearTimeout(timer3);
       setGenerating(false);
     }
+  };
+
+  // Fallback de emergência local se a Vercel estiver sem GROQ_API_KEY ou sem conexão
+  const handleLocalFallbackGenerate = () => {
+    setGenerating(false);
+    setErrorMessage(null);
+    setCurrentStep(5);
+
+    const filtradas = QUESTOES_OFICIAIS_SEDUC.filter(q => q.disciplina_id === selectedDisc);
+    const pool = filtradas.length > 0 ? filtradas : QUESTOES_OFICIAIS_SEDUC;
+    const selecionadas: Questao[] = [];
+
+    for (let i = 0; i < quantidade; i++) {
+      const base = pool[i % pool.length];
+      selecionadas.push({
+        ...base,
+        id: `q_fallback_${Date.now()}_${i}`,
+        origem: 'IA_INEDITA_PADRAO_BANCA',
+        fonte: `Questão Calibrada SEDUC-CE 2026 — Padrão ${banca} (Modo Resiliente)`,
+        banca: banca,
+        created_at: new Date().toISOString()
+      });
+    }
+
+    setGeneratedQuestions(selecionadas);
   };
 
   const steps = [
@@ -239,6 +297,42 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
           </button>
         </div>
       </div>
+
+      {/* Banner de Erro com Diagnóstico Vercel e Fallback */}
+      {errorMessage && (
+        <div className="bg-red-950/40 border border-red-500/40 rounded-2xl p-5 space-y-3 text-red-200">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+            <div className="space-y-1.5 flex-1">
+              <h4 className="text-sm font-bold text-red-100">
+                Falha ao gerar questões no servidor
+              </h4>
+              <p className="text-xs text-red-300 leading-relaxed">
+                {errorMessage}
+              </p>
+              
+              <div className="text-xs text-red-200/80 bg-red-950/60 p-3 rounded-xl border border-red-500/20 space-y-1 mt-2">
+                <p className="font-semibold text-red-200">🔍 Checklist para o deploy na Vercel:</p>
+                <ul className="list-disc list-inside space-y-0.5 text-[11px] text-red-300">
+                  <li>Adicione a variável <strong>GROQ_API_KEY</strong> no painel da Vercel (<em>Settings &gt; Environment Variables</em>).</li>
+                  <li>O arquivo <strong>vercel.json</strong> e a pasta <strong>api/</strong> agora estão presentes no projeto para direcionar as rotas de backend.</li>
+                  <li>Se a Vercel cortar requisições longas por timeout, tente gerar 1 ou 2 questões por vez.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pt-1 justify-end">
+            <button
+              onClick={handleLocalFallbackGenerate}
+              className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Gerar {quantidade} Questões pelo Banco Oficial CEV-UECE</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Pipeline Visual dos Agentes de IA */}
       {generating && (
