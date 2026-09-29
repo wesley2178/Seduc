@@ -101,17 +101,20 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
             <Cpu className="w-6 h-6 animate-pulse" />
           </div>
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                Sistema Multiagente SEDUC
+                Banca Examinadora Oficial • Groq Llama 3.3
               </span>
-              <span className="text-xs text-slate-400">• Sem alucinações</span>
+              <span className="text-xs font-medium text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                llama-3.3-70b-versatile
+              </span>
+              <span className="text-xs text-slate-400">• Rigor de Concurso Público</span>
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-white">
-              Gerador Inteligente de Questões Inéditas sob Demanda
+              Gerador de Questões Inéditas — Modo Banca Examinadora
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
-              O sistema não gera perguntas aleatórias. Ele consulta o edital oficial da SEDUC-CE 2026, as provas da banca examinadora (CEV-UECE, IDECAN, CEBRASPE), a legislação do Ceará e nacional, e passa por um pipeline com 10 agentes especializados de revisão e validação.
+              A IA atua estritamente como a banca examinadora do concurso SEDUC-CE 2026 (padrão CEV-UECE). As questões são formuladas com ineditismo a partir do conteúdo programático do edital e espelham a profundidade e complexidade das provas anteriores autênticas, com gabarito unívoco e parecer técnico de cada distrator.
             </p>
           </div>
         </div>

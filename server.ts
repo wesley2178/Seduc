@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
@@ -21,7 +22,14 @@ async function startServer() {
   // ==========================================
 
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', service: 'SEDUC Concursos Personal Study Engine' });
+    const hasGroqKey = Boolean(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim().length > 0);
+    res.json({ 
+      status: 'ok', 
+      service: 'SEDUC Concursos Personal Study Engine',
+      ai_provider: 'Groq',
+      ai_model: 'llama-3.3-70b-versatile',
+      groq_key_configured: hasGroqKey
+    });
   });
 
   // 1. DASHBOARD COMPLETO (Item 37)

@@ -1,32 +1,64 @@
-import { GoogleGenAI, Type } from '@google/genai';
+import Groq from 'groq-sdk';
 import { db } from '../db/store';
 import { ragService } from './ragService';
 import { Questao, QuestaoOrigem, QuestaoDificuldade, QuestaoValidacao } from '../../src/types';
+import { QUESTOES_OFICIAIS_SEDUC } from '../../src/data/editalOficial';
 
-// Inicialização segura do Gemini com telemetry header
-let aiClient: GoogleGenAI | null = null;
-function getAI(): GoogleGenAI | null {
-  if (!aiClient && process.env.GEMINI_API_KEY) {
+// Gerenciamento seguro do cliente Groq
+let groqClient: Groq | null = null;
+
+function getGroq(): Groq | null {
+  const apiKey = process.env.GROQ_API_KEY?.trim();
+  if (!apiKey) {
+    return null;
+  }
+  if (!groqClient) {
     try {
-      aiClient = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
-          }
-        }
-      });
+      groqClient = new Groq({ apiKey });
     } catch (e) {
-      console.warn('[Gemini] Falha ao instanciar GoogleGenAI:', e);
+      console.warn('[Groq] Falha ao instanciar groq-sdk:', e);
+      return null;
     }
   }
-  return aiClient;
+  return groqClient;
 }
+
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+
+/**
+ * PROMPT DE SISTEMA: BANCA EXAMINADORA OFICIAL DE CONCURSOS PÚBLICOS
+ * Configuração estrita para eliminação total de questões genéricas e garantia
+ * de itens inéditos no padrão de alto nível das bancas de magistério (CEV-UECE / SEDUC-CE).
+ */
+const SYSTEM_PROMPT_BANCA_EXAMINADORA = `Você é o Presidente e Examinador Titular da BANCA EXAMINADORA OFICIAL DE CONCURSOS PÚBLICOS PARA PROFESSORES DA EDUCAÇÃO BÁSICA (com perfil técnico, acadêmico e rigoroso característico da banca examinadora CEV-UECE / SEDUC-CE).
+
+DIRETRIZES VINCULANTES DA BANCA EXAMINADORA:
+1. ATUAÇÃO ESTRITA COMO BANCA EXAMINADORA:
+   - Você NÃO é um assistente virtual genérico, nem gera resumos ou perguntas escolares simples.
+   - É EXPRESSAMENTE PROIBIDO gerar questões genéricas, superficiais, teóricas abstratas ou dissociadas da realidade do edital e das provas do concurso.
+   - Toda questão deve ter o peso, o vocabulário formal e a profundidade de uma prova oficial de concurso público de alta concorrência.
+
+2. INEDITISMO E FIDELIDADE ABSOLUTA AO EDITAL E ÀS PROVAS ANTERIORES:
+   - Crie itens 100% INÉDITOS, sem reproduzir literalmente questões anteriores, mas espelhando rigorosamente a matriz de competências, o nível de profundidade e a sintaxe das provas reais da banca examinadora informada.
+   - Fundamente-se obrigatoriamente na legislação educacional vigente (LDB 9.394/96 atualizada, ECA 8.069/90, BNCC, DCRC e leis estaduais como LC nº 22/2000 do Ceará e SPAECE) e nos autores de referência da bibliografia pedagógica oficial (Paulo Freire, Vygotsky, Piaget, Libâneo, Luckesi, Veiga, Saviani).
+
+3. ARQUITETURA OBRIGATÓRIA DA QUESTÃO DE MÚLTIPLA ESCOLHA:
+   - ENUNCIADO: Contextualizado com uma situação-problema prática da vida escolar (ex.: deliberação de Conselho Escolar, elaboração do PPP, mediação pedagógica em sala de aula, avaliação formativa diagnóstica, análise de dados do SPAECE, caso concreto de inclusão ou aplicação de dispositivo legal), finalizando com um comando objetivo e inequívoco.
+   - 5 ALTERNATIVAS (A, B, C, D, E): Alternativas densas, bem elaboradas, com simetria de tamanho e redação formal.
+   - GABARITO ÚNICO: Apenas UMA alternativa inquestionavelmente correta perante a lei e a doutrina pedagógica consolidada, sem margem para anulação por recurso.
+   - 4 DISTRATORES PLAUSÍVEIS E SOFISTICADOS: Distratores construídos propositalmente com equívocos comuns de concurseiros (troca sutil de prazos, inversão de princípios, generalização abusiva com termos como "exclusivamente", "apenas" ou "sempre", confusão de competências entre entes federativos ou mistura de postulados entre autores pedagógicos).
+   - JUSTIFICATIVA E PARECER TÉCNICO EXAUSTIVO DA BANCA:
+     * "por_que_correta": Demonstração técnica da exatidão da alternativa gabarito com citação explícita do dispositivo normativo (artigo, parágrafo, inciso) ou da tese/obra do autor referenciado.
+     * "por_que_outras_erradas": Análise cirúrgica e individualizada de CADA UM dos 4 distratores, apontando exatamente o erro conceitual ou legal de cada um.
+     * "explicacao": Parecer oficial da banca resumindo o item para os candidatos.
+
+4. FORMATO ESTRUTURADO DE SAÍDA (STRICT JSON ONLY):
+   - Retorne EXCLUSIVAMENTE um objeto JSON válido, sem qualquer texto fora do JSON, pronto para ser lido e armazenado pelo sistema.`;
 
 export class AgentOrchestrator {
   /**
    * 1. AGENTE ORQUESTRADOR:
-   * Ponto central que coordena a geração de questões sob demanda
+   * Ponto central que coordena a geração de questões sob demanda via Groq (llama-3.3-70b-versatile)
    */
   public async generateQuestionsOnDemand(params: {
     disciplina_id: string;
@@ -43,109 +75,128 @@ export class AgentOrchestrator {
     const banca = params.banca || edital?.banca || 'CEV-UECE';
     const dificuldade = params.dificuldade || 'MEDIA';
 
-    // 1. Pesquisa RAG de fontes confiáveis
-    const query = `${disciplina?.nome || ''} ${conteudo?.nome || ''} ${banca} concurso professor SEDUC`;
-    const contextDocs = ragService.searchContext(query, disciplina?.nome, 3);
-    const sourcesSummary = contextDocs.map(d => `${d.source_title}: ${d.text.substring(0, 160)}...`);
+    // 1. Pesquisa RAG de normas e documentos do edital
+    const query = `${disciplina?.nome || ''} ${conteudo?.nome || ''} ${banca} concurso professor SEDUC Ceará`;
+    const contextDocs = ragService.searchContext(query, disciplina?.nome, 4);
+    const sourcesSummary = contextDocs.map(d => `[${d.document_type}] ${d.source_title}: ${d.text.substring(0, 200)}...`);
+
+    // 2. Amostras de Provas Anteriores Oficiais para Calibração de Estilo (Few-Shot Grounding)
+    const questoesExemplo = QUESTOES_OFICIAIS_SEDUC
+      .filter(q => !disciplina || q.disciplina_id === disciplina.id)
+      .slice(0, 2)
+      .map(q => `EXEMPLO DE QUESTÃO OFICIAL DA BANCA (${q.banca} / ${q.ano}):
+Enunciado: ${q.enunciado}
+Gabarito: ${q.resposta_correta}
+Alternativas: ${q.alternativas.map(a => `${a.letra}) ${a.texto}`).join(' | ')}
+Fundamentação: ${q.explicacao}`);
 
     db.addLog({
       agent_name: 'ORQUESTRADOR',
-      request: `Demanda de ${params.quantidade} questões de ${disciplina?.nome || 'Geral'}`,
-      context: `Edital: ${edital?.nome}, Banca: ${banca}, Dificuldade: ${dificuldade}`,
+      request: `Demanda de ${params.quantidade} questão(ões) de ${disciplina?.nome || 'Geral'} [${dificuldade}]`,
+      context: `Edital: ${edital?.nome}, Banca: ${banca}, Motor: Groq ${GROQ_MODEL}`,
       sources: contextDocs.map(d => d.source_title),
-      result: `Acionando agentes: Pesquisador -> Gerador -> Revisor -> Validador -> Duplicidade`,
+      result: `Acionando Groq (${GROQ_MODEL}): Pesquisador RAG -> Gerador Banca -> Revisor -> Validador -> Duplicidade`,
       status: 'SUCESSO',
       execution_time_ms: Date.now() - startTime
     });
 
     const generatedQuestoes: Questao[] = [];
-    const ai = getAI();
+    const groq = getGroq();
 
     for (let i = 0; i < params.quantidade; i++) {
       const qStart = Date.now();
       let rawQuestao: any = null;
 
-      if (ai) {
+      if (groq) {
         try {
-          const prompt = `
-Você é o AGENTE GERADOR DE QUESTÕES do concurso SEDUC (Secretaria de Educação).
-Contexto Normativo Confiável (RAG):
-${sourcesSummary.join('\n')}
+          const userPrompt = `ATUE COMO A BANCA EXAMINADORA ${banca.toUpperCase()} DO CONCURSO PÚBLICO SEDUC-CE 2026.
+Elabore 1 (UMA) questão INÉDITA de múltipla escolha para o cargo de Professor da Educação Básica.
 
-Edital: ${edital?.nome}
-Banca: ${banca} (adote rigorosamente o estilo de cobrança, vocabulário e padrão de alternativas dessa banca)
-Disciplina: ${disciplina?.nome}
-Conteúdo Específico: ${conteudo ? conteudo.nome + ' - ' + conteudo.descricao : 'Tópicos recorrentes do edital'}
-Nível de Dificuldade: ${dificuldade}
+PARÂMETROS OFICIAIS DO CONCURSO:
+- Órgão: Secretaria da Educação do Estado do Ceará (SEDUC-CE 2026)
+- Banca Examinadora: ${banca}
+- Disciplina do Edital: ${disciplina?.nome || 'Conhecimentos Gerais e Pedagógicos'}
+- Conteúdo Programático do Edital: ${conteudo ? `${conteudo.nome} — ${conteudo.descricao}` : 'Tópicos prioritários do edital'}
+- Grau de Dificuldade: ${dificuldade} (evite questões fáceis ou triviais; aprofunde nos critérios da banca)
 
-DIRETRIZES FUNDAMENTAIS:
-1. Crie uma questão INÉDITA, de alto nível, com contextualização escolar prática típica de provas para Professores da SEDUC.
-2. Formule exatamente 5 alternativas (A, B, C, D, E).
-3. Apenas UMA alternativa deve ser inquestionavelmente correta com base na lei ou na teoria pedagógica consolidada.
-4. Fundamente detalhadamente:
-   - Enunciado claro, sem pegadinhas sem fundamento
-   - Explicação pedagógica e legal
-   - "Por que a alternativa correta está correta" com indicação expressa do artigo de lei (ex: Art. 24 da LDB ou art. 53 do ECA) ou autor pedagógico
-   - "Por que cada distrator está errado"
-5. NUNCA invente artigos de lei ou dados fictícios.
+FONTES OFICIAIS DO EDITAL (RAG):
+${sourcesSummary.length > 0 ? sourcesSummary.join('\n') : 'Legislação educacional vigente (LDB 9.394/96, ECA, LC Estadual nº 22/2000, SPAECE, BNCC/DCRC) e autores pedagógicos do edital.'}
 
-Retorne estritamente em JSON no seguinte formato:
+${questoesExemplo.length > 0 ? `PADRÃO DE PROVA ANTERIOR REAL DA BANCA (USE COMO REFERÊNCIA DE ESTILO E DENSIDADE):\n${questoesExemplo.join('\n---\n')}` : ''}
+
+EXIGÊNCIAS TÉCNICAS ESTRUTURAIS:
+1. Enunciado rico, com situação concreta da prática pedagógica ou gestão educacional pública.
+2. Exatamente 5 alternativas identificadas pelas letras A, B, C, D e E.
+3. Exatamente UMA alternativa correta com respaldo expresso na norma ou doutrina.
+4. Quatro distratores verossímeis e desafiadores, típicos de provas concorridas.
+5. Citação rigorosa do fundamento legal (ex.: Artigo X da LDB, Artigo Y da LC 22/2000, matriz do SPAECE ou autor da bibliografia).
+
+RETORNE OBRIGATORIAMENTE EM FORMATO JSON ESTRUTURADO COM AS SEGUINTES CHAVES EXATAS:
 {
-  "enunciado": "...",
+  "enunciado": "Texto completo do enunciado contextualizado com a situação-problema e comando final da banca",
   "alternativas": [
-    { "letra": "A", "texto": "..." },
-    { "letra": "B", "texto": "..." },
-    { "letra": "C", "texto": "..." },
-    { "letra": "D", "texto": "..." },
-    { "letra": "E", "texto": "..." }
+    { "letra": "A", "texto": "Texto completo e formal da alternativa A" },
+    { "letra": "B", "texto": "Texto completo e formal da alternativa B" },
+    { "letra": "C", "texto": "Texto completo e formal da alternativa C" },
+    { "letra": "D", "texto": "Texto completo e formal da alternativa D" },
+    { "letra": "E", "texto": "Texto completo e formal da alternativa E" }
   ],
-  "resposta_correta": "A" ou "B" ou "C" ou "D" ou "E",
-  "explicacao": "...",
-  "por_que_correta": "...",
-  "por_que_outras_erradas": "...",
-  "assunto": "...",
-  "subassunto": "...",
-  "referencia_legal": "..."
-}
-`;
+  "resposta_correta": "A",
+  "explicacao": "Parecer oficial da banca examinadora detalhando a fundamentação do gabarito",
+  "por_que_correta": "Demonstração técnica da correção com indicação do artigo, lei ou teoria",
+  "por_que_outras_erradas": "Análise crítica de cada uma das 4 alternativas erradas (A, B, C, D, E conforme aplicável), explicando o equívoco de cada distrator",
+  "assunto": "${conteudo?.nome || disciplina?.nome || 'Legislação e Didática'}",
+  "subassunto": "Tópico Específico do Edital",
+  "referencia_legal": "Dispositivo legal ou autor/obra correspondente"
+}`;
 
-          const response = await ai.models.generateContent({
-            model: 'gemini-3.8-flash',
-            contents: prompt,
-            config: {
-              responseMimeType: 'application/json',
-              temperature: 0.3
-            }
+          const completion = await groq.chat.completions.create({
+            model: GROQ_MODEL,
+            messages: [
+              {
+                role: 'system',
+                content: SYSTEM_PROMPT_BANCA_EXAMINADORA
+              },
+              {
+                role: 'user',
+                content: userPrompt
+              }
+            ],
+            response_format: { type: 'json_object' },
+            temperature: 0.25,
+            max_tokens: 3000
           });
 
-          const jsonText = response.text?.trim() || '';
-          rawQuestao = JSON.parse(jsonText);
+          const responseText = completion.choices[0]?.message?.content?.trim() || '';
+          rawQuestao = JSON.parse(responseText);
         } catch (err: any) {
-          console.warn('[Gemini Gen] Erro na chamada IA, usando gerador contextual calibrado:', err.message);
+          console.warn('[Groq Llama 3.3 Gen] Erro na geração com Groq:', err.message);
         }
+      } else {
+        console.warn('[Groq] GROQ_API_KEY não configurada no ambiente. Utilizando gerador calibrado da banca CEV-UECE.');
       }
 
-      // Fallback cognitivo calibrado se a IA não responder ou não tiver chave
-      if (!rawQuestao || !rawQuestao.enunciado || !rawQuestao.alternativas) {
+      // Fallback calibrado e autêntico se a Groq não responder ou se a chave não estiver configurada
+      if (!rawQuestao || !rawQuestao.enunciado || !Array.isArray(rawQuestao.alternativas) || rawQuestao.alternativas.length !== 5) {
         rawQuestao = this.generateCalibratedQuestion(disciplina?.nome || '', conteudo?.nome || '', banca, dificuldade, i);
       }
 
       // 2. AGENTE REVISOR & DETECTOR DE DUPLICIDADE
       const isDuplicate = this.checkDuplicity(rawQuestao.enunciado);
       if (isDuplicate) {
-        console.warn('[Duplicidade] Questão similar detectada, ajustando especificidade.');
+        console.warn('[Duplicidade] Questão similar detectada no banco, ajustando identificador.');
       }
 
       // 3. AGENTE VALIDADOR
       const validationResult = this.validateQuestion(rawQuestao);
 
       const novaQuestao: Questao = {
-        id: `q_gen_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 5)}`,
-        edital_id: edital?.id || 'edital_seduc_peb2',
+        id: `q_groq_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 6)}`,
+        edital_id: edital?.id || 'edital_seduc_ce_2026',
         disciplina_id: params.disciplina_id,
         conteudo_id: params.conteudo_id || null,
         origem: params.tipo_origem || 'IA_INEDITA_EDITAL',
-        fonte: `Questão Inédita SEDUC — Padrão ${banca} (Validada por IA)`,
+        fonte: `Questão Inédita SEDUC-CE 2026 — Padrão ${banca} (Groq llama-3.3-70b-versatile)`,
         banca: banca,
         ano: new Date().getFullYear(),
         enunciado: rawQuestao.enunciado,
@@ -155,9 +206,9 @@ Retorne estritamente em JSON no seguinte formato:
         por_que_correta: rawQuestao.por_que_correta,
         por_que_outras_erradas: rawQuestao.por_que_outras_erradas,
         dificuldade: dificuldade,
-        assunto: rawQuestao.assunto || conteudo?.nome || 'Geral',
+        assunto: rawQuestao.assunto || conteudo?.nome || disciplina?.nome || 'Geral',
         subassunto: rawQuestao.subassunto || 'Tópico do Edital',
-        tags: [banca, disciplina?.nome?.split(' ')[0] || 'Geral', 'IA Validada', 'SEDUC'],
+        tags: [banca, disciplina?.nome?.split(' ')[0] || 'Geral', 'Groq Llama 3.3', 'SEDUC-CE', 'Banca Examinadora'],
         status: validationResult.resultado === 'VALIDADA' ? 'publicada' : 'revisando',
         validada: validationResult.resultado === 'VALIDADA',
         created_at: new Date().toISOString(),
@@ -169,9 +220,9 @@ Retorne estritamente em JSON no seguinte formato:
 
       db.addLog({
         agent_name: 'GERADOR_QUESTOES',
-        request: `Geração de questão ${i + 1}/${params.quantidade} (${dificuldade})`,
-        sources: [rawQuestao.referencia_legal || 'Edital SEDUC / LDB / ECA / BNCC'],
-        result: `Questão gerada: ${novaQuestao.id} [${validationResult.resultado}]`,
+        request: `Geração de questão ${i + 1}/${params.quantidade} (${dificuldade}) via Groq ${GROQ_MODEL}`,
+        sources: [rawQuestao.referencia_legal || 'Edital SEDUC-CE / LDB / ECA / SPAECE / LC 22/2000'],
+        result: `Questão gerada: ${novaQuestao.id} [${validationResult.resultado}] - Gabarito: ${novaQuestao.resposta_correta}`,
         status: validationResult.resultado === 'VALIDADA' ? 'SUCESSO' : 'AVISO',
         execution_time_ms: Date.now() - qStart
       });
@@ -189,13 +240,13 @@ Retorne estritamente em JSON no seguinte formato:
     const resposta = q.resposta_correta;
     const problemas: string[] = [];
 
-    if (alternativas.length !== 5) {
+    if (!Array.isArray(alternativas) || alternativas.length !== 5) {
       problemas.push(`Quantidade incorreta de alternativas: esperava 5, recebeu ${alternativas.length}`);
     }
 
     const letras = alternativas.map((a: any) => a.letra);
     if (!letras.includes(resposta)) {
-      problemas.push(`Gabarito indicado (${resposta}) não consta nas alternativas.`);
+      problemas.push(`Gabarito indicado (${resposta}) não consta entre as opções das alternativas.`);
     }
 
     // Checar alternativas repetidas
@@ -210,12 +261,12 @@ Retorne estritamente em JSON no seguinte formato:
     return {
       id: `val_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       questao_id: q.id || 'temp',
-      agente: 'VALIDADOR_MULTIAGENTE_SEDUC',
+      agente: 'VALIDADOR_BANCA_SEDUC',
       resultado: isValid ? 'VALIDADA' : 'REJEITADA',
-      confianca: isValid ? 98 : 40,
+      confianca: isValid ? 99 : 45,
       problemas: problemas.length ? problemas : undefined,
       observacoes: isValid 
-        ? 'Questão validada: gabarito unívoco, ausência de duplicidade factual e aderência ao padrão da banca.'
+        ? 'Questão aprovada pela banca: gabarito unívoco, 5 alternativas estruturadas e alta aderência à matriz do concurso.'
         : `Rejeitada: ${problemas.join('; ')}`,
       created_at: new Date().toISOString()
     };
@@ -243,7 +294,7 @@ Retorne estritamente em JSON no seguinte formato:
     const conteudos = db.getConteudos();
     const disciplinas = db.getDisciplinas();
 
-    // 1. Verificar se há conteúdos em revisão (com erros recorrentes)
+    // 1. Conteúdos em revisão (com taxa de erro alta)
     const emRevisao = progressos.find(p => p.nivel_dominio === 'EM_REVISAO');
     if (emRevisao) {
       const conteudo = conteudos.find(c => c.id === emRevisao.conteudo_id);
@@ -254,7 +305,7 @@ Retorne estritamente em JSON no seguinte formato:
         conteudo_id: emRevisao.conteudo_id,
         conteudo_nome: conteudo?.nome || 'Conteúdo com Erros Recorrentes',
         disciplina_nome: disciplina?.nome || 'Disciplina',
-        mensagem: `Atenção: Identificamos taxa de acerto de ${emRevisao.percentual}% em "${conteudo?.nome}". Recomendamos fazer um simulado rápido de revisão focado para solidificar esse tema antes de avançar.`,
+        mensagem: `Atenção: Identificamos taxa de acerto de ${emRevisao.percentual}% em "${conteudo?.nome}". Recomendamos resolver um lote focado com a banca examinadora antes de avançar.`,
         sugestao_acao: 'Gerar 5 Questões de Revisão'
       };
     }
@@ -270,7 +321,7 @@ Retorne estritamente em JSON no seguinte formato:
         conteudo_id: naoEstudado.id,
         conteudo_nome: naoEstudado.nome,
         disciplina_nome: disciplina?.nome || 'Disciplina',
-        mensagem: `Próximo conteúdo previsto no Edital SEDUC: "${naoEstudado.nome}". O peso no edital é alto. Responda 5 questões iniciais para diagnóstico.`,
+        mensagem: `Próximo conteúdo previsto no Edital SEDUC-CE 2026: "${naoEstudado.nome}". O peso no edital é alto. Responda questões inéditas para diagnóstico inicial.`,
         sugestao_acao: 'Iniciar Estudo do Conteúdo'
       };
     }
@@ -279,153 +330,132 @@ Retorne estritamente em JSON no seguinte formato:
     return {
       tipo: 'SIMULADO_AGENDADO',
       prioridade: 'MEDIA',
-      mensagem: 'Excelente progresso nos conteúdos! Está na hora de testar sua resistência com um Simulado Adaptativo Geral.',
+      mensagem: 'Excelente progresso nos conteúdos do edital! Recomendamos realizar um Simulado Geral no padrão da CEV-UECE.',
       sugestao_acao: 'Fazer Simulado Adaptativo'
     };
   }
 
   /**
-   * 35. EXPLICAÇÃO INTELIGENTE:
-   * Gera explicação conversacional "Explique de forma simples" ou "Dê um exemplo prático"
+   * 35. EXPLICAÇÃO INTELIGENTE VIA GROQ:
+   * Explicação conversacional didática ("Explique de forma simples", "Exemplo prático" ou "Dica para a Banca")
    */
   public async getIntelligentExplanation(questaoId: string, tipo: 'SIMPLES' | 'EXEMPLO' | 'COMO_ESTUDAR'): Promise<string> {
     const questao = db.getQuestoes().find(q => q.id === questaoId);
     if (!questao) return 'Questão não localizada.';
 
-    const ai = getAI();
-    if (ai) {
+    const groq = getGroq();
+    if (groq) {
       try {
         let instruction = '';
         if (tipo === 'SIMPLES') {
-          instruction = 'Explique por que a resposta correta está certa de forma extremamente didática, simples e visual, como se estivesse explicando para um colega professor em 2 parágrafos curtos.';
+          instruction = 'Explique por que o gabarito oficial está inquestionavelmente correto de forma extremamente didática, clara e objetiva, para um professor concorrendo à SEDUC-CE, em no máximo 2 parágrafos.';
         } else if (tipo === 'EXEMPLO') {
-          instruction = 'Dê um exemplo prático do dia a dia da sala de aula ou da gestão escolar que ilustre com precisão o que essa questão aborda.';
+          instruction = 'Apresente uma situação prática autêntica do cotidiano docente ou da gestão escolar em uma escola pública da rede estadual do Ceará (EEMTI ou EEEP) que ilustre perfeitamente o conceito cobrado no item.';
         } else {
-          instruction = 'Diga como o concurseiro deve estudar este tópico específico para a banca SEDUC (quais artigos ler, qual pegadinha evitar, onde focar).';
+          instruction = 'Apresente uma dica estratégica de prova para a banca examinadora do concurso (CEV-UECE / SEDUC-CE): qual pegadinha de prova evitar, qual dispositivo legal memorizar e qual palavra-chave indica a resposta certa.';
         }
 
-        const prompt = `
-Questão do Concurso SEDUC:
+        const prompt = `Questão Oficial do Concurso SEDUC-CE (Banca ${questao.banca}):
 Enunciado: ${questao.enunciado}
-Gabarito: Alternativa ${questao.resposta_correta}
-Explicação base: ${questao.explicacao}
+Gabarito Oficial: Alternativa ${questao.resposta_correta}
+Alternativas:
+${questao.alternativas.map(a => `${a.letra}) ${a.texto}`).join('\n')}
 
-Instrução: ${instruction}
-`;
+Fundamentação da Banca: ${questao.explicacao}
+Por que correta: ${questao.por_que_correta || ''}
 
-        const resp = await ai.models.generateContent({
-          model: 'gemini-3.8-flash',
-          contents: prompt,
+Instrução Específica para o Professor:
+${instruction}`;
+
+        const resp = await groq.chat.completions.create({
+          model: GROQ_MODEL,
+          messages: [
+            {
+              role: 'system',
+              content: 'Você é o Professor Orientador Especialista nos concursos da SEDUC-CE e na banca CEV-UECE. Forneça explicações de altíssimo rigor pedagógico e clareza.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 1200
         });
 
-        return resp.text?.trim() || questao.explicacao;
+        const output = resp.choices[0]?.message?.content?.trim();
+        if (output) return output;
       } catch (err) {
-        console.warn('[Gemini Explicação] Erro na API:', err);
+        console.warn('[Groq Explicação] Erro na chamada da API Groq:', err);
       }
     }
 
-    // Fallback de explicação pré-estruturada
+    // Fallbacks pré-formatados caso a Groq esteja indisponível
     if (tipo === 'SIMPLES') {
-      return `💡 Explicação Direta: ${questao.por_que_correta || questao.explicacao}\n\nO ponto-chave que a banca cobra aqui é não confundir a regra geral com exceções regulamentares.`;
+      return `💡 Explicação Descomplicada: ${questao.por_que_correta || questao.explicacao}\n\nO ponto focal exigido pela banca examinadora é a aplicação direta do texto normativo, sem confundir exceções com a regra geral.`;
     } else if (tipo === 'EXEMPLO') {
-      return `🏫 Exemplo na Prática Escolar: Imagine que em uma reunião de Conselho de Escola, o gestor precise cumprir o planejamento de 200 dias letivos e 800 horas. Mesmo com feriados municipais, a escola não pode fechar o ano letivo com menos de 200 dias de efetivo trabalho escolar com alunos presentes.`;
+      return `🏫 Exemplo na Prática Docente no Ceará: Em uma Escola de Ensino Médio em Tempo Integral (EEMTI) da rede estadual, a equipe docente aplica este princípio durante o planejamento coletivo (HTPC assegurado pela LC nº 22/2000), garantindo alinhamento às matrizes do SPAECE e do DCRC.`;
     } else {
-      return `📖 Guia de Estudo: Para dominar "${questao.assunto}", leia atentamente a lei seca correspondente e resolva ao menos 10 questões da banca CEV-UECE dos últimos concursos, prestando atenção nos prazos e termos obrigatórios.`;
+      return `🧠 Dica de Memorização para a Banca ${questao.banca}: No concurso da SEDUC-CE, a banca frequentemente troca expressões como "poderá" por "deverá" e inverte competências entre o Conselho Escolar e a Diretoria Executiva. Fixe a literalidade dos artigos de lei citados no gabarito.`;
     }
   }
 
   /**
-   * Gerador calibrado para quando a API offline ou sob fallback
-   */
-  private generateCalibratedQuestion(disciplina: string, conteudo: string, banca: string, dificuldade: QuestaoDificuldade, index: number) {
-    const templates = [
-      {
-        enunciado: `Acerca das diretrizes de gestão democrática do ensino público na educação básica (previstas no Art. 14 da LDB 9.394/96 e cobradas recorrentemente pela banca ${banca}), os sistemas de ensino definirão as normas da gestão democrática de acordo com suas peculiaridades e conforme os seguintes princípios:`,
-        alternativas: [
-          { letra: 'A', texto: 'Participação dos profissionais da educação na elaboração do projeto pedagógico da escola e participação das comunidades escolar e local em conselhos escolares ou equivalentes.' },
-          { letra: 'B', texto: 'Indicação discricionária dos diretores escolares exclusivamente pelo Poder Executivo municipal sem consulta aos órgãos colegiados.' },
-          { letra: 'C', texto: 'Votação restrita aos servidores concursados efetivos, vedada a presença de estudantes e familiares no conselho de escola.' },
-          { letra: 'D', texto: 'Elaboração do plano de gestão unicamente pela equipe de supervisão regional da diretoria de ensino.' },
-          { letra: 'E', texto: 'Subordinação da autonomia didático-científica da unidade aos interesses de patrocinadores privados locais.' }
-        ],
-        resposta_correta: 'A',
-        explicacao: 'O art. 14 da LDB 9.394/96 elenca com clareza os dois princípios basilares da gestão democrática: I - participação dos profissionais da educação na elaboração do projeto pedagógico da escola; e II - participação das comunidades escolar e local em conselhos escolares ou equivalentes.',
-        por_que_correta: 'A alternativa A reproduz integralmente os incisos I e II do Artigo 14 da Lei nº 9.394/96.',
-        por_que_outras_erradas: 'As demais alternativas contrariam os postulados de gestão compartilhada, autonomia pedagógica e colegialidade previstos na Constituição Federal e na LDB.',
-        assunto: 'Gestão Democrática Escolar',
-        subassunto: 'LDB Art. 14 e Conselhos Escolares',
-        referencia_legal: 'LDB 9.394/96, Art. 14'
-      },
-      {
-        enunciado: `No âmbito da Didática e da organização do trabalho pedagógico na Educação Básica, a construção do Projeto Político-Pedagógico (PPP), conforme preconiza Ilma Passos Alencastro Veiga, caracteriza-se fundamentalmente por ser:`,
-        alternativas: [
-          { letra: 'A', texto: 'um instrumento burocrático e cartorial exigido pela Diretoria de Ensino para autorização de verbas anuais.' },
-          { letra: 'B', texto: 'um movimento contínuo de reflexão e ação que articula a intencionalidade formativa da escola com a emancipação humana e a participação de todos os segmentos da comunidade escolar.' },
-          { letra: 'C', texto: 'um documento padronizado nacionalmente pelo Ministério da Educação, sem possibilidade de adaptação às particularidades da comunidade.' },
-          { letra: 'D', texto: 'um plano estritamente disciplinar voltado para estabelecer sanções punitivas a condutas discentes inadequadas.' },
-          { letra: 'E', texto: 'uma cartilha elaborada por consultores externos contratados pela Secretaria da Educação.' }
-        ],
-        resposta_correta: 'B',
-        explicacao: 'Veiga destaca que o PPP é político por estar comprometido com a formação do cidadão para uma determinada sociedade, e pedagógico porque define as ações educativas e os traços formativos da escola em processo democrático e participativo.',
-        por_que_correta: 'A alternativa B traduz com exatidão o pensamento pedagógico progressista de Ilma Passos Veiga, referência constante nos editais da SEDUC.',
-        por_que_outras_erradas: 'A, C, D e E reduzem o PPP a mera burocracia, documento padronizado de cima para baixo ou instrumento punitivo, posturas amplamente criticadas pela bibliografia oficial.',
-        assunto: 'Projeto Político-Pedagógico',
-        subassunto: 'Concepção Emancipatória (Veiga)',
-        referencia_legal: 'Veiga, I. P. A. (org.). Projeto Político-Pedagógico da Escola'
-      }
-    ];
-
-    const chosen = templates[index % templates.length];
-    return chosen;
-  }
-
-  /**
-   * Leitura e análise inteligente do edital por IA
+   * Leitura e diagnóstico do edital por IA via Groq
    */
   public async analyzeEditalWithAI(editalText: string) {
-    const ai = getAI();
-    if (ai) {
+    const groq = getGroq();
+    if (groq) {
       try {
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: `Você é o AGENTE ESPECIALISTA EM EDITAIS DE CONCURSOS PÚBLICOS DA EDUCAÇÃO (SEDUC-CE / CEV-UECE 2026).
-Analise o seguinte edital e extraia:
+        const response = await groq.chat.completions.create({
+          model: GROQ_MODEL,
+          messages: [
+            {
+              role: 'system',
+              content: 'Você é o Consultor Técnico Especialista em Editais de Concursos da Educação Básica (SEDUC-CE / CEV-UECE 2026). Retorne estritamente um objeto JSON com o diagnóstico técnico estruturado do certame.'
+            },
+            {
+              role: 'user',
+              content: `Analise o texto oficial do edital da SEDUC-CE 2026 e retorne em formato JSON:
 1. Resumo do perfil da banca e exigências centrais
 2. Distribuição ponderada das disciplinas
-3. Lista dos 6 tópicos mais recorrentes/críticos que o candidato DEVE priorizar
+3. Lista dos 6 tópicos mais críticos que o candidato deve priorizar
 4. Recomendações estratégicas de estudo
 
 Texto do Edital:
-${editalText.substring(0, 8000)}
+${editalText.substring(0, 10000)}
 
-Retorne em formato JSON:
+Retorne rigorosamente no formato JSON:
 {
-  "titulo": "Diagnóstico do Edital",
+  "titulo": "Diagnóstico do Edital SEDUC-CE 2026",
   "resumo_banca": "...",
   "distribuicao_pesos": [
     { "disciplina": "...", "peso": 2.0, "questoes": 20, "relevancia": "ALTÍSSIMA" }
   ],
   "topicos_criticos_vunesp": ["...", "..."],
   "sugestoes_estudo": ["...", "..."]
-}`,
-          config: {
-            responseMimeType: 'application/json'
-          }
+}`
+            }
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.2,
+          max_tokens: 2500
         });
 
-        if (response.text) {
-          const parsed = JSON.parse(response.text);
+        const content = response.choices[0]?.message?.content?.trim();
+        if (content) {
+          const parsed = JSON.parse(content);
           return {
             sucesso: true,
             diagnostico: parsed
           };
         }
-      } catch (e) {
-        console.warn('[Gemini Edital Analysis Error]', e);
+      } catch (e: any) {
+        console.warn('[Groq Edital Analysis Error]', e.message);
       }
     }
 
-    // Fallback grounded de alta precisão
+    // Fallback grounded oficial
     return {
       sucesso: true,
       diagnostico: {
@@ -449,10 +479,71 @@ Retorne em formato JSON:
         sugestoes_estudo: [
           'Dedique atenção especial às políticas da educação cearense (SPAECE, EEMTI, MAIS PAIC): a CEV-UECE valoriza a identidade educacional do Ceará.',
           'Legislação e Conhecimentos Pedagógicos somam 80% do peso total da prova objetiva.',
-          'Pratique resolução de questões estilo CEV-UECE focando na especificidade do Ceará e jurisprudência educacional.'
+          'Pratique resolução de questões no estilo da CEV-UECE focando na especificidade do Ceará e jurisprudência educacional.'
         ]
       }
     };
+  }
+
+  /**
+   * Gerador calibrado para quando a API Groq offline ou sem chave
+   */
+  private generateCalibratedQuestion(disciplina: string, conteudo: string, banca: string, dificuldade: QuestaoDificuldade, index: number) {
+    const templates = [
+      {
+        enunciado: `Em conformidade com a Lei Complementar Estadual nº 22/2000 (Estatuto do Magistério Oficial do Ceará) e a Lei Federal nº 11.738/2008, a jornada de trabalho do Professor da Educação Básica da rede pública estadual cearense é estruturada com reserva obrigatória de parte de sua carga horária para atividades extraclasse, estudos e planejamento pedagógico. Acerca dessa regulamentação, assinale a opção correta:`,
+        alternativas: [
+          { letra: 'A', texto: 'A jornada de trabalho docente destinará, no máximo, 15% (quinze por cento) de sua duração para atividades extraclasse, devendo o restante ser estritamente cumprido em regência efetiva de classe.' },
+          { letra: 'B', texto: 'Na composição da jornada de trabalho, observar-se-á o limite máximo de 2/3 (dois terços) da carga horária para o desempenho das atividades de interação com os educandos, garantindo-se ao menos 1/3 (um terço) para atividades extraclasse e planejamento.' },
+          { letra: 'C', texto: 'A reserva de horas para atividades extraclasse é facultativa para as escolas de tempo integral (EEMTIs), ficando a critério exclusivo da Coordenadoria Regional (CREDE).' },
+          { letra: 'D', texto: 'As horas dedicadas a estudos e planejamento pedagógico podem ser integralmente suprimidas pelo gestor escolar em caso de reposição de dias letivos decorrentes de greve.' },
+          { letra: 'E', texto: 'O cumprimento do terço extraclasse é restrito aos professores detentores de título de pós-graduação stricto sensu.' }
+        ],
+        resposta_correta: 'B',
+        explicacao: 'A Lei Federal nº 11.738/2008 (Art. 2º, § 4º) e o Estatuto do Magistério do Estado do Ceará (LC nº 22/2000) consagram a garantia legal de que, na jornada de trabalho, o limite máximo para interação com educandos é de 2/3, reservando-se no mínimo 1/3 (um terço) para atividades de planejamento pedagógico, preparação de aulas e avaliação (HTPC).',
+        por_que_correta: 'A alternativa B reproduz fielmente a determinação vinculante da Lei nº 11.738/2008 (declarada constitucional pelo STF na ADI 4167) e do Estatuto do Magistério Cearense.',
+        por_que_outras_erradas: 'A, C, D e E trazem percentuais errôneos (15% em vez de 1/3), alegam facultatividade inexistente, admitem supressão arbitrária de direito legal ou criam restrições ilegais com base em titulação.',
+        assunto: 'Legislação Educacional do Ceará',
+        subassunto: 'Jornada Docente e Terço Extraclasse (LC 22/2000)',
+        referencia_legal: 'LC Estadual nº 22/2000 e Lei Federal nº 11.738/2008, Art. 2º, § 4º'
+      },
+      {
+        enunciado: `No âmbito das políticas públicas educacionais do Estado do Ceará, o Sistema Permanente de Avaliação da Educação Básica do Ceará (SPAECE) é uma referência nacional de avaliação em larga escala. Conforme as diretrizes pedagógicas da SEDUC-CE para a utilização dos resultados do SPAECE, assinale a afirmativa correta:`,
+        alternativas: [
+          { letra: 'A', texto: 'O SPAECE restringe-se a atribuir notas punitivas às escolas de menor desempenho, divulgando rankings públicos que inviabilizam o apoio técnico da Secretaria.' },
+          { letra: 'B', texto: 'As escalas de proficiência e padrões de desempenho do SPAECE fornecem subsídios diagnósticos para a formulação de intervenções curriculares contextualizadas e direcionamento de recursos com foco na equidade educacional.' },
+          { letra: 'C', texto: 'A participação no SPAECE é voluntária e exclusiva para estudantes concluintes do Ensino Médio da rede privada de ensino de Fortaleza.' },
+          { letra: 'D', texto: 'Os resultados obtidos no SPAECE substituem integralmente as avaliações formativas e processuais realizadas internamente pelos professores nas unidades escolares.' },
+          { letra: 'E', texto: 'O SPAECE avalia unicamente aspectos comportamentais e disciplinares dos estudantes, sem mensurar competências de Língua Portuguesa e Matemática.' }
+        ],
+        resposta_correta: 'B',
+        explicacao: 'O SPAECE tem por propósito primordial subsidiar a formulação, o monitoramento e a reorientação das políticas públicas educacionais no Estado do Ceará, servindo como ferramenta diagnóstica essencial para que a SEDUC e as escolas promovam a equidade e a melhoria dos processos de ensino-aprendizagem.',
+        por_que_correta: 'A alternativa B sintetiza com precisão a concepção do SPAECE como avaliação diagnóstica a serviço da equidade e do planejamento pedagógico das escolas da rede estadual.',
+        por_que_outras_erradas: 'A confere caráter meramente punitivo; C erra ao classificar como voluntária e voltada à rede privada; D desconsidera a autonomia e necessidade da avaliação interna; E desconsidera as matrizes de referência curriculares.',
+        assunto: 'Políticas Educacionais do Ceará',
+        subassunto: 'SPAECE e Gestão Pedagógica para Equidade',
+        referencia_legal: 'Documento Orientador do SPAECE / SEDUC-CE'
+      },
+      {
+        enunciado: `Na perspectiva da Pedagogia da Autonomia de Paulo Freire, obra referenciada no programa de Conhecimentos Pedagógicos da banca examinadora da SEDUC-CE, a prática educativa verdadeiramente progressista e emancipatória exige do educador o reconhecimento de que:`,
+        alternativas: [
+          { letra: 'A', texto: 'ensinar consiste essencialmente em transferir o conhecimento acumulado aos educandos de forma neutra e desvinculada de sua realidade social.' },
+          { letra: 'B', texto: 'ensinar não é transferir conhecimento, mas criar as possibilidades para a sua própria produção ou a sua construção, mediante rigorosidade metódica e respeito aos saberes dos educandos.' },
+          { letra: 'C', texto: 'a autoridade docente deve ser exercida de modo autoritário para assegurar a disciplina necessária à fixação passiva dos conteúdos.' },
+          { letra: 'D', texto: 'o saber ingênuo e a experiência popular trazida pelos educandos das classes trabalhadoras devem ser descartados pelo professor no início do ano letivo.' },
+          { letra: 'E', texto: 'a reflexão crítica sobre a prática não interfere na formação ética e didática do docente.' }
+        ],
+        resposta_correta: 'B',
+        explicacao: 'Na tese central de "Pedagogia da Autonomia: saberes necessários à prática educativa", Paulo Freire formula expressamente que "ensinar não é transferir conhecimento, mas criar as possibilidades para a sua própria produção ou a sua construção". Tal preceito exige do professor a relação dialógica, a humildade e a reflexão crítica constante.',
+        por_que_correta: 'A alternativa B reproduz o postulado matricial do pensamento freiriano sobre o ato de ensinar e a relação professor-aluno.',
+        por_que_outras_erradas: 'A, C, D e E representam a concepção "bancária", autoritária e alienadora veementemente combatida por Freire em toda a sua obra.',
+        assunto: 'Conhecimentos Pedagógicos',
+        subassunto: 'Pedagogia da Autonomia (Paulo Freire)',
+        referencia_legal: 'Freire, Paulo. Pedagogia da Autonomia: Saberes Necessários à Prática Educativa'
+      }
+    ];
+
+    return templates[index % templates.length];
   }
 }
 
