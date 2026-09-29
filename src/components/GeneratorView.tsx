@@ -284,15 +284,15 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
             className="w-full sm:w-auto px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm shadow-md shadow-purple-600/30 transition flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {generating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span key="btn-loading" className="flex items-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin shrink-0" />
                 <span>Processando Agentes...</span>
-              </>
+              </span>
             ) : (
-              <>
-                <Sparkles className="w-4 h-4" />
+              <span key="btn-idle" className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 shrink-0" />
                 <span>Gerar {quantidade} Questões Inéditas</span>
-              </>
+              </span>
             )}
           </button>
         </div>
@@ -300,7 +300,7 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
 
       {/* Banner de Erro com Diagnóstico Vercel e Fallback */}
       {errorMessage && (
-        <div className="bg-red-950/40 border border-red-500/40 rounded-2xl p-5 space-y-3 text-red-200">
+        <div key="error-diagnostic-banner" className="bg-red-950/40 border border-red-500/40 rounded-2xl p-5 space-y-3 text-red-200">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
             <div className="space-y-1.5 flex-1">
@@ -336,7 +336,7 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
 
       {/* Pipeline Visual dos Agentes de IA */}
       {generating && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
+        <div key="pipeline-visual-block" className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm space-y-4">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <Cpu className="w-4 h-4 text-indigo-400" />
             <span>Pipeline Cognitivo em Execução</span>
@@ -372,7 +372,7 @@ export const GeneratorView: React.FC<GeneratorViewProps> = ({ onGoToQuestions })
 
       {/* Questões Geradas com Sucesso */}
       {generatedQuestions.length > 0 && (
-        <div className="space-y-4">
+        <div key="questions-list-block" className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
